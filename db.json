@@ -1,0 +1,44 @@
+{
+  "users": [
+    {
+      "first_name": "Lucifer",
+      "last_name": "Morningstar",
+      "id": 1,
+      "subjectId": 1
+    },
+    {
+      "first_name": "Damon",
+      "last_name": "Salvator",
+      "id": 2,
+      "subjectId": 2
+    },
+    {
+      "first_name": "Ragnar",
+      "last_name": "Lothbrok",
+      "id": 3,
+      "subjectId": 1
+    },
+    {
+      "first_name": "Johnathan",
+      "last_name": "Wick",
+      "id": 4,
+      "subjectId": 2
+    },
+    {
+      "first_name": "Dexter",
+      "last_name": "Mercer",
+      "subjectId": 1,
+      "id": 5
+    }
+  ],
+  "subjects": [
+    {
+      "name": "Automation",
+      "id": 1
+    },
+    {
+      "name": "Devops",
+      "id": 2
+    }
+  ]
+}
