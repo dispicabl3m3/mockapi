@@ -2,79 +2,68 @@
   "users": [
     {
 	  "name" : "Lucifer Morningstar"
-	  "age" : 30
+	  "age" : "30"
 	  "dob" : "01-01-1991"
       "first_name": "Lucifer",
       "last_name": "Morningstar",
 	  "more":{
-		  [
 		  "address_line1":"xxx",
 		  "address_line2":"yyy",
 		  "address_line3":"zzz",
 		  "phone":""
-		  ]
 	  }
     },
     {
 	  "name" : "Damon Salvator"
-	  "age" : 30
+	  "age" : "30"
 	  "dob" : "01-01-1991"
       "first_name": "Damon",
       "last_name": "Salvator",
       "more":{
-		  [
 		"address_line1":"xxx",
 		"address_line2":"yyy",
 		"address_line3":"zzz",
-		"phone":""
-	  ]
+		"phone":"" 
 	  }
     },
     {
 	  "name" : "Ragnar Lothbrok"
-	  "age" : 30
+	  "age" : "30"
 	  "dob" : "01-01-1991"
       "first_name": "Ragnar",
       "last_name": "Lothbrok",
       "more":{
-		  [
 		"address_line1":"xxx",
 		"address_line2":"yyy",
 		"address_line3":"zzz",
 		"phone":""
-	  ]
 	  }
     },
     {
 	  "name" : "Johnathan Wick"
-	  "age" : 30
+	  "age" : "30"
 	  "dob" : "01-01-1991"
       "first_name": "Johnathan",
       "last_name": "Wick",
       "more":{
-		  [
 		"address_line1":"xxx",
 		"address_line2":"yyy",
 		"address_line3":"zzz",
 		"phone":""
-	  ]
 	  }
     },
     {
 	  "name" : "Dexter Morgan"
-	  "age" : 30
+	  "age" : "30"
 	  "dob" : "01-01-1991"
       "first_name": "Dexter",
       "last_name": "Morgan",
       "more":{
-		  [
 		"address_line1":"xxx",
 		"address_line2":"yyy",
 		"address_line3":"zzz",
 		"phone":""
-	  ]
 	  }
-    }
   ]
   
 }
