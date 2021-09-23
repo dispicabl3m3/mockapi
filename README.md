@@ -1,2 +1,2 @@
-# mocking-api
-mocking api to return list of users
+# mockapi
+mock api to return list of users
