@@ -164,3 +164,42 @@ accumsSummaryDetails() {
     window.open(BASE_URL + '/accums-ui/member/member-detail/accums-ui/summary', '_blank');
 }
 }
+_____________________________________
+
+To write a Karma test case for this code, you can use the `expect` function to check if the data is being stored correctly in the request builder object. Here's an example of how you can write a test case:
+
+```
+describe('RequestBuilder', () => {
+  let requestBuilder: RequestBuilder;
+
+  beforeEach(() => {
+    requestBuilder = new RequestBuilder();
+  });
+
+  it('should store data in the request builder object', () => {
+    const setAccumsData = {
+      groupNumber: '1234',
+      memberPartyId: '5678',
+      policyEffectiveStartEpoch: '2022-01-01',
+    };
+
+    requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, { foo: 'bar' });
+    requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, setAccumsData);
+    requestBuilder.store('SELECTED_GROUPNUMBER', parseInt(setAccumsData?.groupNumber, 10));
+    requestBuilder.store('SELECTED_MEMBER_PARTY_ID', parseInt(setAccumsData?.memberPartyId, 10));
+    requestBuilder.store('SELECTED_POLICY_EFFECTIVE_DATE', setAccumsData?.policyEffectiveStartEpoch);
+
+    expect(requestBuilder.get(Constants.MEMBER_PARTY_FORM_KEY)).toEqual({ foo: 'bar' });
+    expect(requestBuilder.get(Constants.MEMBER_HISTORY_SEARCH_PARAMS)).toEqual(setAccumsData);
+    expect(requestBuilder.get('SELECTED_GROUPNUMBER')).toEqual(1234);
+    expect(requestBuilder.get('SELECTED_MEMBER_PARTY_ID')).toEqual(5678);
+    expect(requestBuilder.get('SELECTED_POLICY_EFFECTIVE_DATE')).toEqual('2022-01-01');
+  });
+});
+```
+
+In this test case, we create a new `RequestBuilder` object in the `beforeEach` block. We then use the `store` function to store data in the request builder object under different keys. 
+
+Finally, we use the `get` function to retrieve the data from the request builder object and use the `expect` function to check if the retrieved data is equal to the expected data.
+
+You can modify this test case to test different scenarios and edge cases.
