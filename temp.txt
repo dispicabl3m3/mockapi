@@ -1,0 +1,166 @@
+import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
+import { ServicesAndPaymentsSummary } from '../../../shared/models/servicesAndPaymentsSummary';
+import { MeterData, ServerErrorModalComponent, ModalService, NotificationMessageModalComponent, RequestBuilder } from 'ui-commons';
+import { ClaimsInformationResponse, ClaimsCassErrorData } from '../../../shared/models/claimsInformationResponse';
+import { Constants} from '../../../../../claims-ui-claims-inquiry-services-module/src/projects';
+import { PatientSummary } from '../../../shared/models/patientSummary';
+import { takeUntil } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+
+@Component({
+    selector: 'claim-summary-service-payments-section',
+    templateUrl: './service-summary.component.html',
+    styleUrls: ['./service-summary.component.scss'],
+    encapsulation: ViewEncapsulation.None
+})
+export class ClaimSummaryServicePaymentsComponent implements OnInit {
+    @Input() servicesSummary: ServicesAndPaymentsSummary;
+    @Input() patientSummary: PatientSummary;
+    @Input() servicesVisible = false;
+    @Input() accumsVisible = false;
+    deductibleData: ClaimsInformationResponse;
+    outOfPocketData: ClaimsInformationResponse;
+    cassError: ClaimsCassErrorData;
+    private unsubscribe$ = new Subject<void>();
+    // temporary default values
+    defaultAmountLimit = 0;
+    defaultAmountUsed = 0;
+    noDataFound = false;
+
+    constructor(
+        private route: ActivatedRoute,
+        public modal: ModalService,
+        public requestBuilder: RequestBuilder
+
+    ) { }
+
+    ngOnInit(): void {
+        this.mappingResponse();
+    }
+
+    checkValueNotEmpty(value: string): string {
+        return (value && value !== '') ? value : '-';
+    }
+
+    checkDateValue(date: string): string {
+        if (date && date !== '') {
+            return (date.includes('9999') || date.includes('0001')) ? '' : date;
+        } else { return ''; }
+    }
+
+    getDeductibleData(): MeterData {
+        const data: MeterData = {
+            max: this.deductibleData?.accumLimit ? Number(this.deductibleData?.accumLimit) : this.defaultAmountLimit,
+            value: this.deductibleData?.amountUsed ? + this.deductibleData?.amountUsed : this.defaultAmountUsed
+        };
+        return data;
+    }
+
+    getOutOfPocketData(): MeterData {
+        const data: MeterData = {
+            max: this.outOfPocketData?.accumLimit ? Number(this.outOfPocketData?.accumLimit) : this.defaultAmountLimit,
+            value: this.outOfPocketData?.amountUsed ? Number(this.outOfPocketData?.amountUsed) : this.defaultAmountUsed
+        };
+        return data;
+    }
+
+    mappingResponse() {
+        this.cassError = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
+            val => val.cassError
+        )?.cassError;
+
+        if (this.cassError) {
+            if (this.cassError.systemError) {
+                this.openServerErrorModal();
+            }
+            this.noDataFound = true;
+        } else {
+            this.deductibleData = this.getAmounts('DEDUCTIBLE');
+            this.outOfPocketData = this.getAmounts('OUT_OF_POCKET');
+        }
+    }
+
+    getAmounts(accumType: string): ClaimsInformationResponse {
+        let tempValue = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
+            val => val.familyorIndividualIndicator === 'INDIVIDUAL' &&
+                val.accumType === accumType
+        );
+        if (!tempValue) {
+            tempValue = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
+                val => val.familyorIndividualIndicator === 'FAMILY' &&
+                    val.accumType === accumType
+            );
+        }
+        return tempValue;
+    }
+
+    openServerErrorModal() {
+        this.modal.openModal(ServerErrorModalComponent, {
+            navigateTo: ['..', ],
+            error: {
+                message: this.cassError.systemErrorMessage,
+                timestamp: this.cassError.timeStamp,
+                sourceList: [{
+                    parameter: 'Reference Number',
+                    pointer: this.cassError.referenceNumber
+                }]
+            },
+            params: {
+                relativeTo: this.route
+            }
+        }).onClose()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => { });
+    }
+
+    viewAccumsDetails() {
+        if (this.servicesSummary.cbdRouterIndicator) {
+            switch (this.servicesSummary.cbdRouterIndicator) {
+                case 'L':
+                case ' ':
+                    this.modal.openModal(
+                    NotificationMessageModalComponent,
+                    {}
+                    ).onClose().subscribe(() => { });
+                    break;
+                case 'N':
+                    window.open('https://accumui.fyiblue.com/accumui/login.do', '_blank');
+                    break;
+                case 'K':
+                    this.accumsSummaryDetails();
+                    break;
+            }
+        }
+    }
+
+accumsSummaryDetails() {
+    const subId = this.patientSummary.subscriberId;
+    const grpId = this.patientSummary.groupId;
+    const setAccumsData = {
+        corporateEntityCode: this.patientSummary.corporateEntityCode.length === 3 ?
+         this.patientSummary.corporateEntityCode : this.patientSummary.corporateEntityCode + '1',
+        groupNumber: grpId.substr(-6),
+        memberPartyId: this.patientSummary.memberId,
+        policyEffectiveEndEpoch:  this.patientSummary.policyEffectiveEndDate,
+        policyEffectiveStartEpoch:  this.patientSummary.policyEffectiveStartDate,
+        searchType: Constants.MEMBER_PARTY,
+        sectionNumber: this.patientSummary.sectionNumber,
+        singleResult: true,
+        subscriberId: subId.substr(-12),
+        subscriberPartyId:  this.patientSummary.subscriberPartyId
+    };
+    const request = {
+        memberPartyId: setAccumsData.memberPartyId.toString(),
+        subpartyId: ''
+    };
+    this.requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, request);
+    this.requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, setAccumsData);
+    this.requestBuilder.store('SELECTED_GROUPNUMBER', parseInt(setAccumsData?.groupNumber, 10));
+    this.requestBuilder.store('SELECTED_MEMBER_PARTY_ID', parseInt(setAccumsData?.memberPartyId, 10));
+    this.requestBuilder.store('SELECTED_POLICY_EFFECTIVE_DATE', setAccumsData?.policyEffectiveStartEpoch);
+
+    const BASE_URL = window.location.origin;
+    window.open(BASE_URL + '/accums-ui/member/member-detail/accums-ui/summary', '_blank');
+}
+}
