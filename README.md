@@ -30,3 +30,40 @@ export class ClaimDetailsUniformBillingComponent implements OnInit {
         } else { return ''; }
     }
 }
+
+----------------------
+
+Here's an example of a test case for the Angular component described earlier:
+
+```
+it('should display other payer details and condition codes details', () => {
+  const uniformBillingDetail: UniformBillingDetails = {
+    otherPayers: ['Payer 1', 'Payer 2', 'Payer 3', 'Payer 4'],
+    conditionCodes: [
+      { code: '01', date: '2022-01-01' },
+      { code: '02', date: '2022-02-02' },
+      { code: '03', date: '2022-03-03' },
+      { code: '04', date: '2022-04-04' },
+      { code: '05', date: '2022-05-05' },
+      { code: '06', date: '2022-06-06' },
+      { code: '07', date: '2022-07-07' },
+      { code: '08', date: '2022-08-08' },
+      { code: '09', date: '2022-09-09' },
+      { code: '10', date: '2022-10-10' },
+      { code: '11', date: '2022-11-11' },
+      { code: '12', date: '2022-12-12' }
+    ]
+  };
+  component.uniformBillingDetail = uniformBillingDetail;
+  fixture.detectChanges();
+  const otherPayersDetails: string[] = ['Payer 1', 'Payer 2', 'Payer 3'];
+  const conditionCodesDetails: ConditionCodes[] = [
+    { code: '01', date: '2022-01-01' },
+    { code: '02', date: '2022-02-02' },
+    { code: '03', date: '2022-03-03' },
+    { code: '04', date: '2022-04-04' },
+    { code: '05', date: '2022-05-05' },
+    { code: '06', date: '2022-06-06' },
+    { code: '07', date: '2022-07-07' },
+    { code: '08', date: '2022-08-08' },
+    { code: '09', date: '2022-09-09' },
