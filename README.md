@@ -67,3 +67,33 @@ it('should display other payer details and condition codes details', () => {
     { code: '07', date: '2022-07-07' },
     { code: '08', date: '2022-08-08' },
     { code: '09', date: '2022-09-09' },
+------------------
+describe('checkDateValue', () => { it('should return an empty string if date is null
+
+or empty', () => {
+
+expect(checkDateValue(null)).toEqual("); expect(checkDateValue('')).toEqual('');
+
+});
+
+it('should return an empty string if date includes "9999" or "0001", () => {
+
+expect(checkDateValue('12/31/9999')).toEqual ('');
+
+expect(checkDateValue('01/01/0001')).toEqual
+
+('');
+
+expect(checkDateValue('12/31/1999')).toEqual ('12/31/1999');
+
+});
+
+it('should return the original date string if it is valid', () => {
+
+expect(checkDateValue('12/31/1999')).toEqual ('12/31/1999');
+
+expect(checkDateValue('01/01/2000')).toEqual ('01/01/2000');
+
+});
+
+});
