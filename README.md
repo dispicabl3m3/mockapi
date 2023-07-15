@@ -97,3 +97,27 @@ expect(checkDateValue('01/01/2000')).toEqual ('01/01/2000');
 });
 
 });
+
+
+Here's an example of a test case that tests the `checkDateValue` function:
+
+```
+describe('checkDateValue', () => {
+  it('should return the correct date value', () => {
+    const date1 = '9999-12-31T00:00:00';
+    const date2 = '2023-07-15T07:51:00';
+    const date3 = '0001-01-01T00:00:00';
+    const date4 = '';
+    const checkedDate1 = checkDateValue(date1);
+    const checkedDate2 = checkDateValue(date2);
+    const checkedDate3 = checkDateValue(date3);
+    const checkedDate4 = checkDateValue(date4);
+    expect(checkedDate1).toEqual('');
+    expect(checkedDate2).toEqual('2023-07-15T07:51:00');
+    expect(checkedDate3).toEqual('');
+    expect(checkedDate4).toEqual('');
+  });
+});
+```
+
+This test case creates four `string` variables, one with a date that includes '9999', one with a valid date, one with a date that includes '0001', and one with an empty string. The test case then passes each of these variables to the `checkDateValue` function. The test case then checks that the result of the function is equal to the expected checked date.
