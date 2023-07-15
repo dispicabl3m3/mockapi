@@ -121,3 +121,56 @@ describe('checkDateValue', () => {
 ```
 
 This test case creates four `string` variables, one with a date that includes '9999', one with a valid date, one with a date that includes '0001', and one with an empty string. The test case then passes each of these variables to the `checkDateValue` function. The test case then checks that the result of the function is equal to the expected checked date.
+
+-------------
+Sure thing! Here's an example Karma test case that tests the behavior of the `ClaimDetailsUniformBillingComponent` component:
+
+```
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ClaimDetailsUniformBillingComponent } from './uniform-billing.component';
+import { UniformBillingDetails } from '../../../shared/models/uniformBillingDetails';
+import { ConditionCodes } from '../../../shared/models/conditionCodes';
+
+describe('ClaimDetailsUniformBillingComponent', () => {
+  let component: ClaimDetailsUniformBillingComponent;
+  let fixture: ComponentFixture<ClaimDetailsUniformBillingComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ClaimDetailsUniformBillingComponent]
+    })
+      .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ClaimDetailsUniformBillingComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should set otherPayersDetails to the first three elements of otherPayers', () => {
+    const uniformBillingDetail: UniformBillingDetails = {
+      otherPayers: ['payer1', 'payer2', 'payer3', 'payer4', 'payer5']
+    };
+    component.uniformBillingDetail = uniformBillingDetail;
+    component.ngOnInit();
+    expect(component.otherPayersDetails).toEqual(['payer1', 'payer2', 'payer3']);
+  });
+
+  it('should set conditionCodesDetails to the first eleven elements of conditionCodes', () => {
+    const uniformBillingDetail: UniformBillingDetails = {
+      conditionCodes: [
+        { code: 'code1', date: '2023-07-15' },
+        { code: 'code2', date: '2023-07-14' },
+        { code: 'code3', date: '2023-07-13' },
+        { code: 'code4', date: '2023-07-12' },
+        { code: 'code5', date: '2023-07-11' },
+        { code: 'code6', date: '2023-07-10' },
+        { code: 'code7', date: '2023-07-09' },
+        { code: 'code8', date: '2023-07-08' },
+        { code: 'code9', date: '2023-07-07' },
+        { code: 'code10', date: '2023-07-06' },
