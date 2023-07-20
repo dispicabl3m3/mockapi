@@ -748,3 +748,76 @@ export class ClaimPatientAccumulationsComponent implements OnInit {
     }
 
 }
+//////////////
+// Import necessary dependencies and the function to test
+import { goToAccumsSummary } from '../path/to/your-file';
+import { PartyModel } from '../path/to/PartyModel';
+import { SearchRequest } from '../path/to/SearchRequest';
+
+describe('goToAccumsSummary', () => {
+  let mockRequestBuilder: any; // Mock for RequestBuilder
+  let mockRouter: any; // Mock for Router
+  let mockMemberRequest: any; // Mock for memberRequest
+
+  beforeEach(() => {
+    // Initialize mock objects before each test
+    mockRequestBuilder = {
+      mapRequest: jasmine.createSpy('mapRequest'),
+      store: jasmine.createSpy('store'),
+    };
+    mockRouter = {
+      navigate: jasmine.createSpy('navigate'),
+    };
+    // Create a mock memberRequest object with the required properties
+    mockMemberRequest = {
+      memberPartyId: '123',
+      groupNumber: '456',
+      policyEffectiveStartEpoch: '2023-07-20',
+    };
+  });
+
+  it('should correctly call mapRequest and store methods', () => {
+    const expectedPartyModel: PartyModel = {
+      memberPartyId: '123',
+      subpartyId: '',
+    };
+
+    // Call the function with the mock objects
+    goToAccumsSummary.call(
+      {
+        memberRequest: mockMemberRequest,
+        requestBuilder: mockRequestBuilder,
+        router: mockRouter,
+      }
+    );
+
+    // Assertions to check if the mapRequest and store methods are called with the expected parameters
+    expect(mockRequestBuilder.mapRequest).toHaveBeenCalledWith(
+      jasmine.any(String),
+      expectedPartyModel,
+      jasmine.any(Object) // Replace this with the appropriate PartyMapper mock
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      expectedPartyModel
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      mockMemberRequest
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      parseInt(mockMemberRequest.memberPartyId, 10)
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      mockMemberRequest.policyEffectiveStartEpoch
+    );
+  });
+
+  // Add more test cases as needed
+});
