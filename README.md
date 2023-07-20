@@ -594,3 +594,157 @@ it('test_edge_case_undefined', () => {
 
 
 });
+/////////////////////////////////
+
+import { Component, OnInit, Input } from '@angular/core';
+import { ClaimsInformationResponse, ClaimsCassErrorData } from '../../../shared/models/claimsInformationResponse';
+import { MeterData, ServerErrorModalComponent, ModalService, RequestBuilder, NotificationMessageModalComponent, Angulartics2LaunchByAdobe } from 'ui-commons';
+import { Constants, PartyModel, PartyMapper, SearchRequest } from '../../../../../claims-ui-claims-inquiry-services-module/src/projects';
+import { ActivatedRoute, Router } from '@angular/router';
+import { takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+
+@Component({
+    selector: 'claim-patient-accumulations-section',
+    templateUrl: './accumulations.component.html',
+    styleUrls: ['./accumulations.component.scss']
+})
+export class ClaimPatientAccumulationsComponent implements OnInit {
+
+    @Input() accumulationDetails: any = null;
+    @Input() memberRequest: any = null; // same as MemberHistorySearchParams type in 'claims-keystone-accums-ui-services-client-module'
+    cassError: ClaimsCassErrorData;
+    private unsubscribe$ = new Subject<void>();
+
+    idiData: ClaimsInformationResponse; // Individual - Deductible - In Network
+    idoData: ClaimsInformationResponse; // Individual - Deductible - Out of Network
+    fdiData: ClaimsInformationResponse; // Family - Deductible - In Network
+    fdoData: ClaimsInformationResponse; // Family - Deductible - Out of Network
+    ioiData: ClaimsInformationResponse; // Individual - Out of Pocket - In Network
+    iooData: ClaimsInformationResponse; // Individual - Out of Pocket - Out of Network
+    foiData: ClaimsInformationResponse; // Family - Out of Pocket - In Network
+    fooData: ClaimsInformationResponse; // Family - Out of Pocket - Out of Network
+
+    idiMeterData: MeterData; // Individual - Deductible - In Network
+    idoMeterData: MeterData; // Individual - Deductible - Out of Network
+    fdiMeterData: MeterData; // Family - Deductible - In Network
+    fdoMeterData: MeterData; // Family - Deductible - Out of Network
+    ioiMeterData: MeterData; // Individual - Out of Pocket - In Network
+    iooMeterData: MeterData; // Individual - Out of Pocket - Out of Network
+    foiMeterData: MeterData; // Family - Out of Pocket - In Network
+    fooMeterData: MeterData; // Family - Out of Pocket - Out of Network
+
+    noDataFound = false;
+
+    constructor(
+        private router: Router,
+        private route: ActivatedRoute,
+        public modal: ModalService,
+        public requestBuilder: RequestBuilder,
+        private adobeAnalytics: Angulartics2LaunchByAdobe
+    ) { }
+
+    ngOnInit(): void {
+        this.mappingResponse();
+    }
+
+    mappingResponse() {
+        this.cassError = (this.accumulationDetails.claimsInformationResponse as any[]).find(
+            val => val.cassError
+        )?.cassError;
+
+        if (this.cassError) {
+            if (this.cassError.systemError) {
+                this.openServerErrorModal();
+            }
+            this.noDataFound = true;
+        } else {
+            // get data for each section
+            this.idiData = this.getData('INDIVIDUAL', 'DEDUCTIBLE', 'IN_NETWORK');
+            this.idiMeterData = this.getMeterData(this.idiData);
+            this.idoData = this.getData('INDIVIDUAL', 'DEDUCTIBLE', 'NON_PARTICIPATING');
+            this.idoMeterData = this.getMeterData(this.idoData);
+            this.fdiData = this.getData('FAMILY', 'DEDUCTIBLE', 'IN_NETWORK');
+            this.fdiMeterData = this.getMeterData(this.fdiData);
+            this.fdoData = this.getData('FAMILY', 'DEDUCTIBLE', 'NON_PARTICIPATING');
+            this.fdoMeterData = this.getMeterData(this.fdoData);
+            this.ioiData = this.getData('INDIVIDUAL', 'OUT_OF_POCKET', 'IN_NETWORK');
+            this.ioiMeterData = this.getMeterData(this.ioiData);
+            this.iooData = this.getData('INDIVIDUAL', 'OUT_OF_POCKET', 'NON_PARTICIPATING');
+            this.iooMeterData = this.getMeterData(this.iooData);
+            this.foiData = this.getData('FAMILY', 'OUT_OF_POCKET', 'IN_NETWORK');
+            this.foiMeterData = this.getMeterData(this.foiData);
+            this.fooData = this.getData('FAMILY', 'OUT_OF_POCKET', 'NON_PARTICIPATING');
+            this.fooMeterData = this.getMeterData(this.fooData);
+        }
+    }
+
+    getData(familyorIndividualIndicator: string, accumType: string, costContainmentIndicator: string): ClaimsInformationResponse {
+        return (this.accumulationDetails.claimsInformationResponse as any[]).find(
+            val => val.familyorIndividualIndicator === familyorIndividualIndicator &&
+                val.accumType === accumType &&
+                val.costContainmentIndicator === costContainmentIndicator
+        );
+    }
+
+    getMeterData(data) {
+        return { max: +data?.accumLimit || 0, value: +data?.amountUsed || 0};
+    }
+
+    openServerErrorModal() {
+        this.modal.openModal(ServerErrorModalComponent, {
+            navigateTo: [],
+            error: {
+                message: this.cassError.systemErrorMessage,
+                timestamp: this.cassError.timeStamp,
+                sourceList: [{
+                    parameter: 'Reference Number',
+                    pointer: this.cassError.referenceNumber
+                }]
+            },
+            params: {
+                relativeTo: this.route
+            }
+        }).onClose()
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => {});
+    }
+
+    viewAccumsDetails() {
+        this.adobeAnalytics.eventTrack('cl_click_view_accums_details');
+        if (this.accumulationDetails.cbdRouterIndicator || this.accumulationDetails.cbdRouterIndicator === '') {
+            switch (this.accumulationDetails.cbdRouterIndicator) {
+                case 'K':
+                    this.goToAccumsSummary();
+                    break;
+                case 'N':
+                    window.open('https://accumui.fyiblue.com/accumui/login.do', '_blank');
+                    break;
+                case 'L':
+                case '':
+                    this.modal.openModal(
+                        NotificationMessageModalComponent,
+                        {}
+                    ).onClose().subscribe(() => { });
+                    break;
+            }
+        }
+    }
+
+    goToAccumsSummary() {
+        const requestParams: PartyModel = {
+            memberPartyId: this.memberRequest.memberPartyId,
+            subpartyId: ''
+        };
+        this.requestBuilder.mapRequest<PartyModel, SearchRequest>(Constants.MEMBER_SEARCH_REQUEST_KEY,
+            requestParams, new PartyMapper()
+        );
+        this.requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, requestParams );
+        this.requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, this.memberRequest);
+        sessionStorage.setItem(Constants.SELECTED_GROUPNUMBER, this.memberRequest.groupNumber);
+        this.requestBuilder.store(Constants.SELECTED_MEMBER_PARTY_ID, parseInt(this.memberRequest.memberPartyId, 10));
+        this.requestBuilder.store(Constants.SELECTED_POLICY_EFFECTIVE_DATE, this.memberRequest.policyEffectiveStartEpoch);
+        this.router.navigate(['accums-ui', 'member', 'member-detail', 'accums-ui', 'summary']);
+    }
+
+}
