@@ -71,3 +71,107 @@ describe('goToAccumsSummary', () => {
 
   // Add more test cases as needed
 });
+/////////////////////
+
+// Import necessary dependencies and the component
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { YourComponent } from '../path/to/your-component';
+// ... Other imports and mocks as needed
+
+describe('YourComponent', () => {
+  let component: YourComponent;
+  let fixture: ComponentFixture<YourComponent>;
+
+  beforeEach(async () => {
+    // Initialize TestBed and configure the testing module
+    await TestBed.configureTestingModule({
+      declarations: [YourComponent],
+      // ... Other module configuration as needed
+      providers: [
+        // Provide your mocked dependencies here (e.g., Router, RequestBuilder, etc.)
+        // Make sure to provide mocks that match the dependencies used in the component.
+      ],
+    }).compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(YourComponent);
+    component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    // Add any cleanup code here (e.g., unsubscribe$ subject, etc.)
+    component.unsubscribe$.next();
+    component.unsubscribe$.complete();
+  });
+
+  // Test cases for mappingResponse()
+  describe('mappingResponse', () => {
+    it('should set cassError and noDataFound to true if there is a cassError', () => {
+      const cassErrorData = {
+        systemError: true,
+        systemErrorMessage: 'Server Error',
+        timeStamp: '2023-07-20T00:00:00Z',
+        referenceNumber: '123456789',
+      };
+      component.accumulationDetails = {
+        claimsInformationResponse: [{ cassError: cassErrorData }],
+      };
+
+      component.mappingResponse();
+
+      expect(component.cassError).toEqual(cassErrorData);
+      expect(component.noDataFound).toBe(true);
+    });
+
+    it('should set data for each section if there is no cassError', () => {
+      const claimsInformationResponse = [
+        // Add test data here as needed for each section
+      ];
+      component.accumulationDetails = {
+        claimsInformationResponse: claimsInformationResponse,
+      };
+
+      component.mappingResponse();
+
+      // Add your expectations here for setting data for each section
+    });
+  });
+
+  // Test cases for goToAccumsSummary()
+  describe('goToAccumsSummary', () => {
+    it('should navigate to accums-ui/member/member-detail/accums-ui/summary', () => {
+      const mockRouter = TestBed.inject(Router);
+      const mockRequestBuilder = TestBed.inject(RequestBuilder);
+
+      spyOn(mockRouter, 'navigate');
+
+      component.memberRequest = {
+        memberPartyId: '123',
+        groupNumber: '456',
+        policyEffectiveStartEpoch: '2023-07-20',
+      };
+
+      component.goToAccumsSummary();
+
+      expect(mockRequestBuilder.mapRequest).toHaveBeenCalled();
+      expect(mockRequestBuilder.store).toHaveBeenCalledTimes(5);
+      expect(mockRouter.navigate).toHaveBeenCalledWith([
+        'accums-ui',
+        'member',
+        'member-detail',
+        'accums-ui',
+        'summary',
+      ]);
+    });
+
+    // Add more test cases for different scenarios if needed
+  });
+
+  // Test cases for viewAccumsDetails()
+  describe('viewAccumsDetails', () => {
+    // Add test cases for the viewAccumsDetails() function if needed
+    // Note: The function contains some conditional logic based on the value of accumulationDetails.cbdRouterIndicator,
+    // so you may want to write tests to cover different cases.
+  });
+});
