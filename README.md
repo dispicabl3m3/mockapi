@@ -340,4 +340,257 @@ accumsSummaryDetails() {
     const BASE_URL = window.location.origin;
     window.open(BASE_URL + '/accums-ui/member/member-detail/accums-ui/summary', '_blank');
 }
-}
+}/////////////////////
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { ClaimPatientAccumulationsComponent } from './accumulations.component';
+import { NullEmptyToNaPipe, Angulartics2LaunchByAdobe, MeterComponent, NotificationMessageModalComponent, RequestBuilder } from 'ui-commons';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatDivider } from '@angular/material/divider';
+import { MemberRequest } from 'projects/claims-ui-app/src/app/model/memberRequest';
+import { Router } from '@angular/router';
+import { Constants } from 'projects/claims-ui-app/src/app/claims-ui-claims-inquiry-services-module/src/projects';
+
+let adobeAnalytics: jasmine.SpyObj<Angulartics2LaunchByAdobe>;
+const accumulationDetails = {
+  claimsInformationResponse : [
+    {
+        accumLimit: '16300.00',
+        accumType: 'DEDUCTIBLE',
+        amountApplied: '1250.00',
+        amountRemaining: '15050.00',
+        amountUsed: '1250.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'IN_NETWORK',
+        familyorIndividualIndicator: 'INDIVIDUAL',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '16300.00',
+        accumType: 'DEDUCTIBLE',
+        amountApplied: '250.00',
+        amountRemaining: '16050.00',
+        amountUsed: '250.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'OUT_OF_NETWORK',
+        familyorIndividualIndicator: 'INDIVIDUAL',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '16300.00',
+        accumType: 'DEDUCTIBLE',
+        amountApplied: '750.00',
+        amountRemaining: '15550.00',
+        amountUsed: '750.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'IN_NETWORK',
+        familyorIndividualIndicator: 'FAMILY',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '16300.00',
+        accumType: 'DEDUCTIBLE',
+        amountApplied: '800.00',
+        amountRemaining: '15500.00',
+        amountUsed: '800.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'OUT_OF_NETWORK',
+        familyorIndividualIndicator: 'FAMILY',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '12300.00',
+        accumType: 'OUT_OF_POCKET',
+        amountApplied: '250.00',
+        amountRemaining: '12050.00',
+        amountUsed: '250.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'IN_NETWORK',
+        familyorIndividualIndicator: 'INDIVIDUAL',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '12300.00',
+        accumType: 'OUT_OF_POCKET',
+        amountApplied: '200.00',
+        amountRemaining: '12100.00',
+        amountUsed: '200.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'OUT_OF_NETWORK',
+        familyorIndividualIndicator: 'INDIVIDUAL',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '12300.00',
+        accumType: 'OUT_OF_POCKET',
+        amountApplied: '250.00',
+        amountRemaining: '12050.00',
+        amountUsed: '250.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'IN_NETWORK',
+        familyorIndividualIndicator: 'FAMILY',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    },
+    {
+        accumLimit: '10000.00',
+        accumType: 'OUT_OF_POCKET',
+        amountApplied: '2000.00',
+        amountRemaining: '8000.00',
+        amountUsed: '2000.00',
+        appliedToSubscript: '00',
+        benefitPeriodBeginningDate: '2021-01-01T06:00:00.000+0000',
+        benefitPeriodEndingDate: '2021-12-31T06:00:00.000+0000',
+        carryOverCreditIndicator: '0',
+        costContainmentIndicator: 'OUT_OF_NETWORK',
+        familyorIndividualIndicator: 'FAMILY',
+        icdNo: 'NONE',
+        internalDescriptor: 'OUTPOCKET',
+        percentageLevel: '0.50',
+        placeOfTreatment: '',
+        treatmentGroup: '0R',
+        valueQualifier: 'DOLLARS'
+    }
+  ]
+};
+
+describe('ClaimPatientAccumulationsComponent', () => {
+  let component: ClaimPatientAccumulationsComponent;
+  let fixture: ComponentFixture<ClaimPatientAccumulationsComponent>;
+
+  beforeEach(async () => {
+    adobeAnalytics = jasmine.createSpyObj('Angulartics2LaunchByAdobe', ['eventTrack', 'isAuthorized']);
+    await TestBed.configureTestingModule({
+      declarations: [ ClaimPatientAccumulationsComponent, NullEmptyToNaPipe, MatDivider, MeterComponent ],
+      imports: [RouterTestingModule, HttpClientTestingModule],
+      providers: [{ provide: Angulartics2LaunchByAdobe, useValue: adobeAnalytics}]
+    })
+    .compileComponents();
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ClaimPatientAccumulationsComponent);
+    component = fixture.componentInstance;
+    component.accumulationDetails = accumulationDetails;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  /////////////////////////
+
+  it('should map data correctly when there is no cassError', () => {
+    const component = new ClaimPatientAccumulationsComponent(null, null, null, null, null);
+    component.accumulationDetails = {
+        claimsInformationResponse: [
+            {
+                familyorIndividualIndicator: 'INDIVIDUAL',
+                accumType: 'DEDUCTIBLE',
+                costContainmentIndicator: 'IN_NETWORK',
+                accumLimit: 100,
+                amountUsed: 50
+            },
+            {
+                familyorIndividualIndicator: 'INDIVIDUAL',
+                accumType: 'DEDUCTIBLE',
+                costContainmentIndicator: 'NON_PARTICIPATING',
+                accumLimit: 200,
+                amountUsed: 100
+            }
+        ]
+    };
+    component.mappingResponse();
+    expect(component.noDataFound).toBeFalsy();
+});
+
+it('test_behaviour_K', () => {
+  spyOn(component, 'goToAccumsSummary');
+  component.accumulationDetails.cbdRouterIndicator = 'K';
+  component.viewAccumsDetails();
+  expect(component.goToAccumsSummary).toHaveBeenCalled();
+});
+
+it('test_behaviour_N', () => {
+  spyOn(window, 'open');
+  component.accumulationDetails.cbdRouterIndicator = 'N';
+  component.viewAccumsDetails();
+  expect(window.open).toHaveBeenCalledWith('https://accumui.fyiblue.com/accumui/login.do', '_blank');
+});
+
+//
+it('test_behaviour_L', () => {
+  spyOn(component.modal, 'openModal').and.returnValue({ onClose: () => { } });
+  component.accumulationDetails.cbdRouterIndicator = 'L';
+  component.viewAccumsDetails();
+  expect(component.modal.openModal).toHaveBeenCalledWith(NotificationMessageModalComponent, {});
+});
+//
+
+it('test_edge_case_undefined', () => {
+  spyOn(component.modal, 'openModal');
+  component.accumulationDetails.cbdRouterIndicator = undefined;
+  component.viewAccumsDetails();
+  expect(component.modal.openModal).not.toHaveBeenCalled();
+});
+
+
+
+});
