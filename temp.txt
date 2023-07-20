@@ -1,205 +1,73 @@
-import { Component, OnInit, Input, ViewEncapsulation } from '@angular/core';
-import { ServicesAndPaymentsSummary } from '../../../shared/models/servicesAndPaymentsSummary';
-import { MeterData, ServerErrorModalComponent, ModalService, NotificationMessageModalComponent, RequestBuilder } from 'ui-commons';
-import { ClaimsInformationResponse, ClaimsCassErrorData } from '../../../shared/models/claimsInformationResponse';
-import { Constants} from '../../../../../claims-ui-claims-inquiry-services-module/src/projects';
-import { PatientSummary } from '../../../shared/models/patientSummary';
-import { takeUntil } from 'rxjs/operators';
-import { ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
+// Import necessary dependencies and the function to test
 
-@Component({
-    selector: 'claim-summary-service-payments-section',
-    templateUrl: './service-summary.component.html',
-    styleUrls: ['./service-summary.component.scss'],
-    encapsulation: ViewEncapsulation.None
-})
-export class ClaimSummaryServicePaymentsComponent implements OnInit {
-    @Input() servicesSummary: ServicesAndPaymentsSummary;
-    @Input() patientSummary: PatientSummary;
-    @Input() servicesVisible = false;
-    @Input() accumsVisible = false;
-    deductibleData: ClaimsInformationResponse;
-    outOfPocketData: ClaimsInformationResponse;
-    cassError: ClaimsCassErrorData;
-    private unsubscribe$ = new Subject<void>();
-    // temporary default values
-    defaultAmountLimit = 0;
-    defaultAmountUsed = 0;
-    noDataFound = false;
+import { goToAccumsSummary } from '../path/to/your-file';
+import { PartyModel } from '../path/to/PartyModel';
+import { SearchRequest } from '../path/to/SearchRequest';
 
-    constructor(
-        private route: ActivatedRoute,
-        public modal: ModalService,
-        public requestBuilder: RequestBuilder
-
-    ) { }
-
-    ngOnInit(): void {
-        this.mappingResponse();
-    }
-
-    checkValueNotEmpty(value: string): string {
-        return (value && value !== '') ? value : '-';
-    }
-
-    checkDateValue(date: string): string {
-        if (date && date !== '') {
-            return (date.includes('9999') || date.includes('0001')) ? '' : date;
-        } else { return ''; }
-    }
-
-    getDeductibleData(): MeterData {
-        const data: MeterData = {
-            max: this.deductibleData?.accumLimit ? Number(this.deductibleData?.accumLimit) : this.defaultAmountLimit,
-            value: this.deductibleData?.amountUsed ? + this.deductibleData?.amountUsed : this.defaultAmountUsed
-        };
-        return data;
-    }
-
-    getOutOfPocketData(): MeterData {
-        const data: MeterData = {
-            max: this.outOfPocketData?.accumLimit ? Number(this.outOfPocketData?.accumLimit) : this.defaultAmountLimit,
-            value: this.outOfPocketData?.amountUsed ? Number(this.outOfPocketData?.amountUsed) : this.defaultAmountUsed
-        };
-        return data;
-    }
-
-    mappingResponse() {
-        this.cassError = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
-            val => val.cassError
-        )?.cassError;
-
-        if (this.cassError) {
-            if (this.cassError.systemError) {
-                this.openServerErrorModal();
-            }
-            this.noDataFound = true;
-        } else {
-            this.deductibleData = this.getAmounts('DEDUCTIBLE');
-            this.outOfPocketData = this.getAmounts('OUT_OF_POCKET');
-        }
-    }
-
-    getAmounts(accumType: string): ClaimsInformationResponse {
-        let tempValue = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
-            val => val.familyorIndividualIndicator === 'INDIVIDUAL' &&
-                val.accumType === accumType
-        );
-        if (!tempValue) {
-            tempValue = (this.servicesSummary.accumulators.claimsInformationResponse as any[]).find(
-                val => val.familyorIndividualIndicator === 'FAMILY' &&
-                    val.accumType === accumType
-            );
-        }
-        return tempValue;
-    }
-
-    openServerErrorModal() {
-        this.modal.openModal(ServerErrorModalComponent, {
-            navigateTo: ['..', ],
-            error: {
-                message: this.cassError.systemErrorMessage,
-                timestamp: this.cassError.timeStamp,
-                sourceList: [{
-                    parameter: 'Reference Number',
-                    pointer: this.cassError.referenceNumber
-                }]
-            },
-            params: {
-                relativeTo: this.route
-            }
-        }).onClose()
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe(() => { });
-    }
-
-    viewAccumsDetails() {
-        if (this.servicesSummary.cbdRouterIndicator) {
-            switch (this.servicesSummary.cbdRouterIndicator) {
-                case 'L':
-                case ' ':
-                    this.modal.openModal(
-                    NotificationMessageModalComponent,
-                    {}
-                    ).onClose().subscribe(() => { });
-                    break;
-                case 'N':
-                    window.open('https://accumui.fyiblue.com/accumui/login.do', '_blank');
-                    break;
-                case 'K':
-                    this.accumsSummaryDetails();
-                    break;
-            }
-        }
-    }
-
-accumsSummaryDetails() {
-    const subId = this.patientSummary.subscriberId;
-    const grpId = this.patientSummary.groupId;
-    const setAccumsData = {
-        corporateEntityCode: this.patientSummary.corporateEntityCode.length === 3 ?
-         this.patientSummary.corporateEntityCode : this.patientSummary.corporateEntityCode + '1',
-        groupNumber: grpId.substr(-6),
-        memberPartyId: this.patientSummary.memberId,
-        policyEffectiveEndEpoch:  this.patientSummary.policyEffectiveEndDate,
-        policyEffectiveStartEpoch:  this.patientSummary.policyEffectiveStartDate,
-        searchType: Constants.MEMBER_PARTY,
-        sectionNumber: this.patientSummary.sectionNumber,
-        singleResult: true,
-        subscriberId: subId.substr(-12),
-        subscriberPartyId:  this.patientSummary.subscriberPartyId
-    };
-    const request = {
-        memberPartyId: setAccumsData.memberPartyId.toString(),
-        subpartyId: ''
-    };
-    this.requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, request);
-    this.requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, setAccumsData);
-    this.requestBuilder.store('SELECTED_GROUPNUMBER', parseInt(setAccumsData?.groupNumber, 10));
-    this.requestBuilder.store('SELECTED_MEMBER_PARTY_ID', parseInt(setAccumsData?.memberPartyId, 10));
-    this.requestBuilder.store('SELECTED_POLICY_EFFECTIVE_DATE', setAccumsData?.policyEffectiveStartEpoch);
-
-    const BASE_URL = window.location.origin;
-    window.open(BASE_URL + '/accums-ui/member/member-detail/accums-ui/summary', '_blank');
-}
-}
-_____________________________________
-
-To write a Karma test case for this code, you can use the `expect` function to check if the data is being stored correctly in the request builder object. Here's an example of how you can write a test case:
-
-```
-describe('RequestBuilder', () => {
-  let requestBuilder: RequestBuilder;
+describe('goToAccumsSummary', () => {
+  let mockRequestBuilder: any; // Mock for RequestBuilder
+  let mockRouter: any; // Mock for Router
+  let mockMemberRequest: any; // Mock for memberRequest
 
   beforeEach(() => {
-    requestBuilder = new RequestBuilder();
+    // Initialize mock objects before each test
+    mockRequestBuilder = {
+      mapRequest: jasmine.createSpy('mapRequest'),
+      store: jasmine.createSpy('store'),
+    };
+    mockRouter = {
+      navigate: jasmine.createSpy('navigate'),
+    };
+    // Create a mock memberRequest object with the required properties
+    mockMemberRequest = {
+      memberPartyId: '123',
+      groupNumber: '456',
+      policyEffectiveStartEpoch: '2023-07-20',
+    };
   });
 
-  it('should store data in the request builder object', () => {
-    const setAccumsData = {
-      groupNumber: '1234',
-      memberPartyId: '5678',
-      policyEffectiveStartEpoch: '2022-01-01',
+  it('should correctly call mapRequest and store methods', () => {
+    const expectedPartyModel: PartyModel = {
+      memberPartyId: '123',
+      subpartyId: '',
     };
 
-    requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, { foo: 'bar' });
-    requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, setAccumsData);
-    requestBuilder.store('SELECTED_GROUPNUMBER', parseInt(setAccumsData?.groupNumber, 10));
-    requestBuilder.store('SELECTED_MEMBER_PARTY_ID', parseInt(setAccumsData?.memberPartyId, 10));
-    requestBuilder.store('SELECTED_POLICY_EFFECTIVE_DATE', setAccumsData?.policyEffectiveStartEpoch);
+    // Call the function with the mock objects
+    goToAccumsSummary.call(
+      {
+        memberRequest: mockMemberRequest,
+        requestBuilder: mockRequestBuilder,
+        router: mockRouter,
+      }
+    );
 
-    expect(requestBuilder.get(Constants.MEMBER_PARTY_FORM_KEY)).toEqual({ foo: 'bar' });
-    expect(requestBuilder.get(Constants.MEMBER_HISTORY_SEARCH_PARAMS)).toEqual(setAccumsData);
-    expect(requestBuilder.get('SELECTED_GROUPNUMBER')).toEqual(1234);
-    expect(requestBuilder.get('SELECTED_MEMBER_PARTY_ID')).toEqual(5678);
-    expect(requestBuilder.get('SELECTED_POLICY_EFFECTIVE_DATE')).toEqual('2022-01-01');
+    // Assertions to check if the mapRequest and store methods are called with the expected parameters
+    expect(mockRequestBuilder.mapRequest).toHaveBeenCalledWith(
+      jasmine.any(String),
+      expectedPartyModel,
+      jasmine.any(Object) // Replace this with the appropriate PartyMapper mock
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      expectedPartyModel
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      mockMemberRequest
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      parseInt(mockMemberRequest.memberPartyId, 10)
+    );
+
+    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
+      jasmine.any(String),
+      mockMemberRequest.policyEffectiveStartEpoch
+    );
   });
+
+  // Add more test cases as needed
 });
-```
-
-In this test case, we create a new `RequestBuilder` object in the `beforeEach` block. We then use the `store` function to store data in the request builder object under different keys. 
-
-Finally, we use the `get` function to retrieve the data from the request builder object and use the `expect` function to check if the retrieved data is equal to the expected data.
-
-You can modify this test case to test different scenarios and edge cases.
