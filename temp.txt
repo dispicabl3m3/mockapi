@@ -1,177 +1,214 @@
-// Import necessary dependencies and the function to test
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { RequestBuilder, Constants as CommonConstants } from 'ui-commons';
 
-import { goToAccumsSummary } from '../path/to/your-file';
-import { PartyModel } from '../path/to/PartyModel';
-import { SearchRequest } from '../path/to/SearchRequest';
+import * as moment_ from 'moment';
+import { Constants } from '../shared/constants';
+import { RouterType } from '../../../claims-ui-claims-inquiry-services-module/src/projects';
 
-describe('goToAccumsSummary', () => {
-  let mockRequestBuilder: any; // Mock for RequestBuilder
-  let mockRouter: any; // Mock for Router
-  let mockMemberRequest: any; // Mock for memberRequest
+// @ts-ignore
+const moment = moment_.default;
 
-  beforeEach(() => {
-    // Initialize mock objects before each test
-    mockRequestBuilder = {
-      mapRequest: jasmine.createSpy('mapRequest'),
-      store: jasmine.createSpy('store'),
-    };
-    mockRouter = {
-      navigate: jasmine.createSpy('navigate'),
-    };
-    // Create a mock memberRequest object with the required properties
-    mockMemberRequest = {
-      memberPartyId: '123',
-      groupNumber: '456',
-      policyEffectiveStartEpoch: '2023-07-20',
-    };
-  });
+export interface FlattenedSearchResult {
+  dob?: string;
+  firstName?: string;
+  gender?: string;
+  lastName?: string;
+  middleInitial?: string;
+  accountNumber?: string;
+  clientMemberId?: string;
+  corporateEntityCode?: string;
+  groupNumber?: string;
+  memberPartyId?: number;
+  policyEffectiveStartEpoch?: number;
+  policyEffectiveEndEpoch?: number;
+  policyStatus?: string;
+  relationshipCode?: string;
+  sectionNumber?: string;
+  subscriberId?: string;
+  subscriberPartyId?: number;
+}
 
-  it('should correctly call mapRequest and store methods', () => {
-    const expectedPartyModel: PartyModel = {
-      memberPartyId: '123',
-      subpartyId: '',
-    };
+@Injectable({
+  providedIn: 'root'
+})
+export class SearchResultsUtils {
+  static checkLowHighDate(date: string) {
+    throw new Error('Method not implemented.');
+  }
+  static checkServiceToDate: any;
+  static addAttributeKey(searchAttributes: { attributeKey: string; attributeValue: string; }[], key: string, value: string) {
+    throw new Error('Method not implemented.');
+  }
+  static updateDashForNullValue(arg0: null): any {
+    throw new Error('Method not implemented.');
+  }
+  static updatePatientNameDobRows(input: { firstName: string; lastName: string; }[]) {
+    throw new Error('Method not implemented.');
+  }
 
-    // Call the function with the mock objects
-    goToAccumsSummary.call(
-      {
-        memberRequest: mockMemberRequest,
-        requestBuilder: mockRequestBuilder,
-        router: mockRouter,
+  constructor(
+    private router: Router,
+    private requestBuilder: RequestBuilder
+  ) { }
+
+  updateClaimsRows(results: any[]): any[] {
+    return results.map(row => {
+      const onClick = () => {
+        window.name = 'regular';
+        this.requestBuilder.store(CommonConstants.RESTRICTED_GROUP_FLAG, row.restrictedGroupFlag);
+        this.router.navigate([RouterType.CLAIM_UI, RouterType.CLAIM_SEARCH, RouterType.CLAIM_RESULT, row.claimIdentifier]);
+      };
+      const onOpenInNewTab = () => {
+        const BASE_URL = window.location.origin;
+        const winProxyObject = window.open(BASE_URL + `/claims-ui/search/claim-result/${row.claimIdentifier}/claim-summary`, '_blank');
+        this.requestBuilder.storeInNewWindow(CommonConstants.RESTRICTED_GROUP_FLAG, row.restrictedGroupFlag, winProxyObject);
+        winProxyObject.window.name = 'newTab';
+      };
+      if (row.patientDOB && isNaN(row.patientDOB)) {
+        row.patientDOB = this.checkLowHighDate(row.patientDOB);
       }
-    );
-
-    // Assertions to check if the mapRequest and store methods are called with the expected parameters
-    expect(mockRequestBuilder.mapRequest).toHaveBeenCalledWith(
-      jasmine.any(String),
-      expectedPartyModel,
-      jasmine.any(Object) // Replace this with the appropriate PartyMapper mock
-    );
-
-    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
-      jasmine.any(String),
-      expectedPartyModel
-    );
-
-    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
-      jasmine.any(String),
-      mockMemberRequest
-    );
-
-    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
-      jasmine.any(String),
-      parseInt(mockMemberRequest.memberPartyId, 10)
-    );
-
-    expect(mockRequestBuilder.store).toHaveBeenCalledWith(
-      jasmine.any(String),
-      mockMemberRequest.policyEffectiveStartEpoch
-    );
-  });
-
-  // Add more test cases as needed
-});
-/////////////////////
-
-// Import necessary dependencies and the component
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { YourComponent } from '../path/to/your-component';
-// ... Other imports and mocks as needed
-
-describe('YourComponent', () => {
-  let component: YourComponent;
-  let fixture: ComponentFixture<YourComponent>;
-
-  beforeEach(async () => {
-    // Initialize TestBed and configure the testing module
-    await TestBed.configureTestingModule({
-      declarations: [YourComponent],
-      // ... Other module configuration as needed
-      providers: [
-        // Provide your mocked dependencies here (e.g., Router, RequestBuilder, etc.)
-        // Make sure to provide mocks that match the dependencies used in the component.
-      ],
-    }).compileComponents();
-  });
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(YourComponent);
-    component = fixture.componentInstance;
-  });
-
-  afterEach(() => {
-    // Add any cleanup code here (e.g., unsubscribe$ subject, etc.)
-    component.unsubscribe$.next();
-    component.unsubscribe$.complete();
-  });
-
-  // Test cases for mappingResponse()
-  describe('mappingResponse', () => {
-    it('should set cassError and noDataFound to true if there is a cassError', () => {
-      const cassErrorData = {
-        systemError: true,
-        systemErrorMessage: 'Server Error',
-        timeStamp: '2023-07-20T00:00:00Z',
-        referenceNumber: '123456789',
+      if (row.dcn) {
+        if (row.dcn.text) {
+          row.dcn.text = row.dcn.text;
+        } else {
+          row.dcn = { text: row.dcn };
+        }
+        row.dcn.onClick = onClick;
+        row.dcn.onOpenInNewTab = onOpenInNewTab;
+      }
+      if (typeof row?.status !== 'object') {
+        row.status = {
+          text: row.statusDescription,
+          badgeText: row.status
+        };
+      }
+      if (typeof row?.claimType !== 'object') {
+        row.claimType = {
+          text: row.claimTypeDescription,
+          badgeText: row.claimType
+        };
+      }
+      if (typeof row?.payeeCode !== 'object') {
+        row.payeeCode = {
+          text: row.payeeCodeDescription,
+          badgeText: row.payeeCode
+        };
+      }
+      if (typeof row?.releaseStatusIndicator !== 'object') {
+        row.releaseStatusIndicator = {
+          text: row.releaseStatusIndicatorDescription,
+          badgeText: row.releaseStatusIndicator
+        };
+      }
+      if (typeof row?.statusReason !== 'object') {
+        row.statusReason = {
+          text: row.statusReasonDescription,
+          badgeText: row.statusReason
+        };
+      }
+      if (row.patientFirstName) {
+        row.patientName = `${row.patientFirstName.trim()} ${row.patientLastName.trim()}`.trim();
+      }
+      return {
+        ...row,
+        serviceDates: [this.checkServiceFromDate(row.serviceDateStart) ? row.serviceDateStartEpoch : '', this.checkServiceToDate(row.serviceDateEnd) ? row.serviceDateEndEpoch : '']
       };
-      component.accumulationDetails = {
-        claimsInformationResponse: [{ cassError: cassErrorData }],
-      };
-
-      component.mappingResponse();
-
-      expect(component.cassError).toEqual(cassErrorData);
-      expect(component.noDataFound).toBe(true);
     });
+  }
 
-    it('should set data for each section if there is no cassError', () => {
-      const claimsInformationResponse = [
-        // Add test data here as needed for each section
-      ];
-      component.accumulationDetails = {
-        claimsInformationResponse: claimsInformationResponse,
+  updatePatientPartialRows(results: any[]): any[] {
+    return results.map(row => {
+      const onClick = () => {
+        // TODO: Service call for clain DCN url. Local storage parameter
+        this.router.navigate(
+          ['claims-ui', 'search', 'results'], { queryParams: { searchType: 'claimspatientnamedob' } });
       };
-
-      component.mappingResponse();
-
-      // Add your expectations here for setting data for each section
+      row.name.onClick = onClick;
+      return row;
     });
-  });
+  }
 
-  // Test cases for goToAccumsSummary()
-  describe('goToAccumsSummary', () => {
-    it('should navigate to accums-ui/member/member-detail/accums-ui/summary', () => {
-      const mockRouter = TestBed.inject(Router);
-      const mockRequestBuilder = TestBed.inject(RequestBuilder);
+  parseDate(now: number | string): number {
+    if (now == null) {
+      return null;
+    }
+    if (isNaN(+now)) {
+      return +now.toString().indexOf('/') !== -1 ? moment.utc(now, 'MM/DD/YYYY').unix() : moment.utc(now, 'MM-DD-YYYY').unix();
+    }
+    return +now;
+  }
 
-      spyOn(mockRouter, 'navigate');
-
-      component.memberRequest = {
-        memberPartyId: '123',
-        groupNumber: '456',
-        policyEffectiveStartEpoch: '2023-07-20',
+  formatFamilyMembers(familyMember: any) {
+    return familyMember.map(member => {
+      return {
+        memberName: `${member.firstName}${member.middleInitial ? ' ' + member.middleInitial : ''} ${member.lastName}`,
+        relationship: {
+          badgeText: member.relationship,
+          text: 'NoDescription'
+        },
+        gender: member.gender,
+        dob: this.checkLowHighDate(member.dob),
+        effectiveDate: member.effectiveFromEpoch,
+        endDate: member.effectiveToEpoch
       };
-
-      component.goToAccumsSummary();
-
-      expect(mockRequestBuilder.mapRequest).toHaveBeenCalled();
-      expect(mockRequestBuilder.store).toHaveBeenCalledTimes(5);
-      expect(mockRouter.navigate).toHaveBeenCalledWith([
-        'accums-ui',
-        'member',
-        'member-detail',
-        'accums-ui',
-        'summary',
-      ]);
     });
+  }
 
-    // Add more test cases for different scenarios if needed
-  });
+  updateDashForNullValue(data: string) {
+    return (data === null || data === '') ? '-' : data;
+  }
 
-  // Test cases for viewAccumsDetails()
-  describe('viewAccumsDetails', () => {
-    // Add test cases for the viewAccumsDetails() function if needed
-    // Note: The function contains some conditional logic based on the value of accumulationDetails.cbdRouterIndicator,
-    // so you may want to write tests to cover different cases.
-  });
-});
+  updatePatientNameDobRows(results: any[]): any[] {
+    if (!results) {
+      return;
+    }
+    return results.map(row => {
+      const onClick = () => {
+        const claimsSearchRequest = this.requestBuilder.fetchStorage(Constants.CLAIMS_SEARCH_REQUEST_KEY);
+        this.addAttributeKey(claimsSearchRequest.searchAttributes, 'clientMemberId', row.clientMemberId);
+        this.addAttributeKey(claimsSearchRequest.searchAttributes, 'ignoreMemberMatchCheck', true);
+        this.requestBuilder.store(Constants.CLAIMS_SEARCH_REQUEST_KEY, claimsSearchRequest);
+        this.router.navigate(
+          ['claims-ui', 'search', 'results'], { queryParams: { searchType: 'claimsclientmemberid', type: 'claims' } });
+        // Added Dummy QueryParam  "type: 'claims'" to re-trigger resolver function for clientmemberid search flow.
+      };
+      if (row.firstName) {
+        if (row.firstName.text) {
+          row.name.text = `${row.firstName.text} ${row.lastName.text}`;
+        } else {
+          row.name = { text: row.firstName + ' ' + row.lastName };
+        }
+        row.name.onClick = onClick;
+      }
+      if (row.dob) {
+        row.dob = this.parseDate(row.dob);
+      }
+      return row;
+    });
+  }
+
+  addAttributeKey(searchAttributes: any[], key: string, value: any) {
+    if (!searchAttributes.some(attributeItem => attributeItem.attributeKey === key)) {
+      searchAttributes.push({ attributeKey: key, attributeValue: value });
+    }
+  }
+
+  checkServiceFromDate(date: string): string {
+    if (date && date !== '') {
+      return date.includes('0001') ? '' : date;
+    } else { return ''; }
+  }
+
+  checkServiceToDate(date: string): string {
+    if (date && date !== '') {
+      return date.includes('9999') ? '' : date;
+    } else { return ''; }
+  }
+
+  checkLowHighDate(date: any) {
+    if (!!date && date !== '') {
+      return (date.includes('0001') || date.includes('9999')) ? '' : this.parseDate(date);
+    } else { return ''; }
+  }
+}
