@@ -1,214 +1,41 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { RequestBuilder, Constants as CommonConstants } from 'ui-commons';
+import static org.junit.Assert.*;
+import org.junit.Test;
+import java.text.ParseException;
+import java.util.Date;
+import javax.xml.datatype.XMLGregorianCalendar;
 
-import * as moment_ from 'moment';
-import { Constants } from '../shared/constants';
-import { RouterType } from '../../../claims-ui-claims-inquiry-services-module/src/projects';
+public class FormatterTest {
 
-// @ts-ignore
-const moment = moment_.default;
-
-export interface FlattenedSearchResult {
-  dob?: string;
-  firstName?: string;
-  gender?: string;
-  lastName?: string;
-  middleInitial?: string;
-  accountNumber?: string;
-  clientMemberId?: string;
-  corporateEntityCode?: string;
-  groupNumber?: string;
-  memberPartyId?: number;
-  policyEffectiveStartEpoch?: number;
-  policyEffectiveEndEpoch?: number;
-  policyStatus?: string;
-  relationshipCode?: string;
-  sectionNumber?: string;
-  subscriberId?: string;
-  subscriberPartyId?: number;
-}
-
-@Injectable({
-  providedIn: 'root'
-})
-export class SearchResultsUtils {
-  static checkLowHighDate(date: string) {
-    throw new Error('Method not implemented.');
-  }
-  static checkServiceToDate: any;
-  static addAttributeKey(searchAttributes: { attributeKey: string; attributeValue: string; }[], key: string, value: string) {
-    throw new Error('Method not implemented.');
-  }
-  static updateDashForNullValue(arg0: null): any {
-    throw new Error('Method not implemented.');
-  }
-  static updatePatientNameDobRows(input: { firstName: string; lastName: string; }[]) {
-    throw new Error('Method not implemented.');
-  }
-
-  constructor(
-    private router: Router,
-    private requestBuilder: RequestBuilder
-  ) { }
-
-  updateClaimsRows(results: any[]): any[] {
-    return results.map(row => {
-      const onClick = () => {
-        window.name = 'regular';
-        this.requestBuilder.store(CommonConstants.RESTRICTED_GROUP_FLAG, row.restrictedGroupFlag);
-        this.router.navigate([RouterType.CLAIM_UI, RouterType.CLAIM_SEARCH, RouterType.CLAIM_RESULT, row.claimIdentifier]);
-      };
-      const onOpenInNewTab = () => {
-        const BASE_URL = window.location.origin;
-        const winProxyObject = window.open(BASE_URL + `/claims-ui/search/claim-result/${row.claimIdentifier}/claim-summary`, '_blank');
-        this.requestBuilder.storeInNewWindow(CommonConstants.RESTRICTED_GROUP_FLAG, row.restrictedGroupFlag, winProxyObject);
-        winProxyObject.window.name = 'newTab';
-      };
-      if (row.patientDOB && isNaN(row.patientDOB)) {
-        row.patientDOB = this.checkLowHighDate(row.patientDOB);
-      }
-      if (row.dcn) {
-        if (row.dcn.text) {
-          row.dcn.text = row.dcn.text;
-        } else {
-          row.dcn = { text: row.dcn };
-        }
-        row.dcn.onClick = onClick;
-        row.dcn.onOpenInNewTab = onOpenInNewTab;
-      }
-      if (typeof row?.status !== 'object') {
-        row.status = {
-          text: row.statusDescription,
-          badgeText: row.status
-        };
-      }
-      if (typeof row?.claimType !== 'object') {
-        row.claimType = {
-          text: row.claimTypeDescription,
-          badgeText: row.claimType
-        };
-      }
-      if (typeof row?.payeeCode !== 'object') {
-        row.payeeCode = {
-          text: row.payeeCodeDescription,
-          badgeText: row.payeeCode
-        };
-      }
-      if (typeof row?.releaseStatusIndicator !== 'object') {
-        row.releaseStatusIndicator = {
-          text: row.releaseStatusIndicatorDescription,
-          badgeText: row.releaseStatusIndicator
-        };
-      }
-      if (typeof row?.statusReason !== 'object') {
-        row.statusReason = {
-          text: row.statusReasonDescription,
-          badgeText: row.statusReason
-        };
-      }
-      if (row.patientFirstName) {
-        row.patientName = `${row.patientFirstName.trim()} ${row.patientLastName.trim()}`.trim();
-      }
-      return {
-        ...row,
-        serviceDates: [this.checkServiceFromDate(row.serviceDateStart) ? row.serviceDateStartEpoch : '', this.checkServiceToDate(row.serviceDateEnd) ? row.serviceDateEndEpoch : '']
-      };
-    });
-  }
-
-  updatePatientPartialRows(results: any[]): any[] {
-    return results.map(row => {
-      const onClick = () => {
-        // TODO: Service call for clain DCN url. Local storage parameter
-        this.router.navigate(
-          ['claims-ui', 'search', 'results'], { queryParams: { searchType: 'claimspatientnamedob' } });
-      };
-      row.name.onClick = onClick;
-      return row;
-    });
-  }
-
-  parseDate(now: number | string): number {
-    if (now == null) {
-      return null;
+    @Test
+    public void testDateToXMLGregorianCal() {
+        Date javaDate = new Date();
+        XMLGregorianCalendar xmlCal = Formatter.dateToXMLGregorianCal(javaDate);
+        assertNotNull(xmlCal);
+        assertEquals(javaDate, Formatter.xmlGregorianCalToDate(xmlCal));
     }
-    if (isNaN(+now)) {
-      return +now.toString().indexOf('/') !== -1 ? moment.utc(now, 'MM/DD/YYYY').unix() : moment.utc(now, 'MM-DD-YYYY').unix();
+
+    @Test
+    public void testDateToXMLGregorianDate() {
+        Date javaDate = new Date();
+        XMLGregorianCalendar xmlCal = Formatter.dateToXMLGregorianDate(javaDate);
+        assertNotNull(xmlCal);
+        assertNull(xmlCal.getTimezone());
+        assertEquals(javaDate, Formatter.xmlGregorianCalToDate(xmlCal));
     }
-    return +now;
-  }
 
-  formatFamilyMembers(familyMember: any) {
-    return familyMember.map(member => {
-      return {
-        memberName: `${member.firstName}${member.middleInitial ? ' ' + member.middleInitial : ''} ${member.lastName}`,
-        relationship: {
-          badgeText: member.relationship,
-          text: 'NoDescription'
-        },
-        gender: member.gender,
-        dob: this.checkLowHighDate(member.dob),
-        effectiveDate: member.effectiveFromEpoch,
-        endDate: member.effectiveToEpoch
-      };
-    });
-  }
-
-  updateDashForNullValue(data: string) {
-    return (data === null || data === '') ? '-' : data;
-  }
-
-  updatePatientNameDobRows(results: any[]): any[] {
-    if (!results) {
-      return;
+    @Test
+    public void testParseDate() throws ParseException {
+        String dateString = "2023-09-20T10:30:00Z"; // Replace with a valid date string
+        XMLGregorianCalendar xmlCal = Formatter.parseDate(dateString);
+        assertNotNull(xmlCal);
+        assertEquals(dateString, Formatter.formatDate(xmlCal));
     }
-    return results.map(row => {
-      const onClick = () => {
-        const claimsSearchRequest = this.requestBuilder.fetchStorage(Constants.CLAIMS_SEARCH_REQUEST_KEY);
-        this.addAttributeKey(claimsSearchRequest.searchAttributes, 'clientMemberId', row.clientMemberId);
-        this.addAttributeKey(claimsSearchRequest.searchAttributes, 'ignoreMemberMatchCheck', true);
-        this.requestBuilder.store(Constants.CLAIMS_SEARCH_REQUEST_KEY, claimsSearchRequest);
-        this.router.navigate(
-          ['claims-ui', 'search', 'results'], { queryParams: { searchType: 'claimsclientmemberid', type: 'claims' } });
-        // Added Dummy QueryParam  "type: 'claims'" to re-trigger resolver function for clientmemberid search flow.
-      };
-      if (row.firstName) {
-        if (row.firstName.text) {
-          row.name.text = `${row.firstName.text} ${row.lastName.text}`;
-        } else {
-          row.name = { text: row.firstName + ' ' + row.lastName };
-        }
-        row.name.onClick = onClick;
-      }
-      if (row.dob) {
-        row.dob = this.parseDate(row.dob);
-      }
-      return row;
-    });
-  }
 
-  addAttributeKey(searchAttributes: any[], key: string, value: any) {
-    if (!searchAttributes.some(attributeItem => attributeItem.attributeKey === key)) {
-      searchAttributes.push({ attributeKey: key, attributeValue: value });
+    @Test
+    public void testFormatDate() {
+        // Replace with a valid XMLGregorianCalendar and its expected formatted string
+        XMLGregorianCalendar xmlCal = null;
+        String expectedFormattedDate = ""; // Replace with the expected formatted date
+        assertEquals(expectedFormattedDate, Formatter.formatDate(xmlCal));
     }
-  }
-
-  checkServiceFromDate(date: string): string {
-    if (date && date !== '') {
-      return date.includes('0001') ? '' : date;
-    } else { return ''; }
-  }
-
-  checkServiceToDate(date: string): string {
-    if (date && date !== '') {
-      return date.includes('9999') ? '' : date;
-    } else { return ''; }
-  }
-
-  checkLowHighDate(date: any) {
-    if (!!date && date !== '') {
-      return (date.includes('0001') || date.includes('9999')) ? '' : this.parseDate(date);
-    } else { return ''; }
-  }
 }
