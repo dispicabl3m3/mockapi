@@ -1,41 +1,94 @@
-import static org.junit.Assert.*;
-import org.junit.Test;
-import java.text.ParseException;
-import java.util.Date;
-import javax.xml.datatype.XMLGregorianCalendar;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-public class FormatterTest {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
-    @Test
-    public void testDateToXMLGregorianCal() {
-        Date javaDate = new Date();
-        XMLGregorianCalendar xmlCal = Formatter.dateToXMLGregorianCal(javaDate);
-        assertNotNull(xmlCal);
-        assertEquals(javaDate, Formatter.xmlGregorianCalToDate(xmlCal));
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import com.hcsc.claims.uis.enums.aom.ClaimIncrementReasonCode;
+import com.hcsc.claims.uis.enums.aom.ClaimStatusCode;
+import com.hcsc.claims.uis.model.aom.ReferenceDomainDescription;
+import com.hcsc.claims.uis.model.aom.ReferenceDomainDescriptionFields;
+import com.hcsc.claims.uis.model.aom.ReferenceDomainName;
+
+public class ClaimStatusCodeSubSetTest {
+
+    private ClaimStatusCodeSubSet claimStatusCodeSubSet;
+    private ReferenceDomainName mockContainer;
+
+    @BeforeEach
+    public void setUp() {
+        claimStatusCodeSubSet = new ClaimStatusCodeSubSet();
+        claimStatusCodeSubSet.init();
+
+        mockContainer = mock(ReferenceDomainName.class);
     }
 
     @Test
-    public void testDateToXMLGregorianDate() {
-        Date javaDate = new Date();
-        XMLGregorianCalendar xmlCal = Formatter.dateToXMLGregorianDate(javaDate);
-        assertNotNull(xmlCal);
-        assertNull(xmlCal.getTimezone());
-        assertEquals(javaDate, Formatter.xmlGregorianCalToDate(xmlCal));
+    public void testPopulateClaimStatusByDisposition() {
+        // Create a list of mock ReferenceDomainDescriptionFields
+        List<ReferenceDomainDescriptionFields> mockClaimStatusList = Arrays.asList(
+                createMockReferenceDomainDescriptionFields("Pend_pre_payment_COB_investigation"),
+                createMockReferenceDomainDescriptionFields("Paid"),
+                createMockReferenceDomainDescriptionFields("Withdrawn_registered_in_error"),
+                createMockReferenceDomainDescriptionFields("Some_Other_Code")
+        );
+
+        // Mock the behavior of the container to return the list of mock claim statuses
+        when(mockContainer.getClaimStatus()).thenReturn(new ReferenceDomainDescription());
+        when(mockContainer.getClaimStatus().getDataList()).thenReturn(mockClaimStatusList);
+
+        // Call the method to populate claim status by disposition
+        claimStatusCodeSubSet.populateClaimStatusByDisposition(mockContainer);
+
+        // Verify that the corresponding sets in the container have been populated correctly
+        verify(mockContainer).setClaimPendStatus(any());
+        verify(mockContainer).setClaimIncrementStatus(any());
+        verify(mockContainer).setClaimWithdrawStatus(any());
+        verify(mockContainer).setClaimReleaseStatus(any());
+        verify(mockContainer).setClaimDenyStatus(any());
+        verify(mockContainer).setClaimFinalizedStatus(any());
+        verify(mockContainer).setClaimCloseStatus(any());
+
+        // Get the populated sets from the container
+        Set<String> pendStatus = claimStatusCodeSubSet.getPendStatusCodes();
+        Set<String> incrementStatus = claimStatusCodeSubSet.getIncrementReasonCodes();
+        Set<String> withdrawStatus = claimStatusCodeSubSet.getWithdrawStatusCodes();
+        Set<String> releaseStatus = claimStatusCodeSubSet.getReleaseStatusCodes();
+        Set<String> denyStatus = claimStatusCodeSubSet.getDenyStatusCodes();
+        Set<String> finalizedStatus = claimStatusCodeSubSet.getFinalizedStatusCodes();
+        Set<String> closeStatus = claimStatusCodeSubSet.getCloseStatusCodes();
+
+        // Verify that the sets contain the expected values
+        assertTrue(pendStatus.contains("Pend_pre_payment_COB_investigation"));
+        assertFalse(pendStatus.contains("Paid"));
+
+        assertTrue(incrementStatus.contains(ClaimIncrementReasonCode.SOME_REASON_CODE.code()));
+        assertFalse(incrementStatus.contains("Withdrawn_registered_in_error"));
+
+        assertTrue(withdrawStatus.contains(ClaimStatusCode.Withdrawn_registered_in_error.code()));
+        assertFalse(withdrawStatus.contains("Paid"));
+
+        assertTrue(releaseStatus.contains(ClaimStatusCode.Paid.code()));
+        assertFalse(releaseStatus.contains("Withdrawn_registered_in_error"));
+
+        assertTrue(denyStatus.contains(ClaimStatusCode.BIS_claim_disapproved.code()));
+        assertFalse(denyStatus.contains("Paid"));
+
+        assertTrue(finalizedStatus.contains(ClaimStatusCode.BIS_claim_paid.code()));
+        assertFalse(finalizedStatus.contains("Withdrawn_registered_in_error"));
+
+        assertTrue(closeStatus.contains(ClaimStatusCode.Claim_closed_for_COB_investigation_issued_no_payment.code()));
+        assertFalse(closeStatus.contains("Paid"));
     }
 
-    @Test
-    public void testParseDate() throws ParseException {
-        String dateString = "2023-09-20T10:30:00Z"; // Replace with a valid date string
-        XMLGregorianCalendar xmlCal = Formatter.parseDate(dateString);
-        assertNotNull(xmlCal);
-        assertEquals(dateString, Formatter.formatDate(xmlCal));
-    }
-
-    @Test
-    public void testFormatDate() {
-        // Replace with a valid XMLGregorianCalendar and its expected formatted string
-        XMLGregorianCalendar xmlCal = null;
-        String expectedFormattedDate = ""; // Replace with the expected formatted date
-        assertEquals(expectedFormattedDate, Formatter.formatDate(xmlCal));
+    private ReferenceDomainDescriptionFields createMockReferenceDomainDescriptionFields(String code) {
+        ReferenceDomainDescriptionFields mockField = mock(ReferenceDomainDescriptionFields.class);
+        when(mockField.getValue()).thenReturn(code);
+        return mockField;
     }
 }
