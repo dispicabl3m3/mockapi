@@ -1,95 +1,57 @@
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { ActivatedRoute } from '@angular/router';
+import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons'; // Import your dependencies here
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import { TabSectionHeaderComponent } from './tab-section-header.component';
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+describe('TabSectionHeaderComponent', () => {
+  let component: TabSectionHeaderComponent;
+  let fixture: ComponentFixture<TabSectionHeaderComponent>;
 
-import com.hcsc.claims.uis.enums.aom.ClaimIncrementReasonCode;
-import com.hcsc.claims.uis.enums.aom.ClaimStatusCode;
-import com.hcsc.claims.uis.model.aom.ReferenceDomainDescription;
-import com.hcsc.claims.uis.model.aom.ReferenceDomainDescriptionFields;
-import com.hcsc.claims.uis.model.aom.ReferenceDomainName;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [TabSectionHeaderComponent],
+      imports: [RouterTestingModule],
+      providers: [
+        Angulartics2LaunchByAdobe,
+        RequestBuilder,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              routeConfig: { path: 'test-path' } // Mock ActivatedRoute snapshot
+            }
+          }
+        }
+      ]
+    }).compileComponents();
+  });
 
-public class ClaimStatusCodeSubSetTest {
+  beforeEach(() => {
+    fixture = TestBed.createComponent(TabSectionHeaderComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-    private ClaimStatusCodeSubSet claimStatusCodeSubSet;
-    private ReferenceDomainName mockContainer;
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
 
-    @BeforeEach
-    public void setUp() {
-        claimStatusCodeSubSet = new ClaimStatusCodeSubSet();
-        claimStatusCodeSubSet.init();
+  it('should handle onDropDownSubmit correctly', () => {
+    // Mock data for input properties
+    component.providerDetails = {};
+    component.patientDetails = {
+      claimFromDate: '2023-01-01',
+      memberId: '123456'
+    };
 
-        mockContainer = mock(ReferenceDomainName.class);
-    }
+    // Simulate a dropdown submit event
+    component.onDropDownSubmit({ currentValue: component.viewAdditionalDetailsOptions[0] });
 
-    @Test
-    public void testPopulateClaimStatusByDisposition() {
-        // Create a list of mock ReferenceDomainDescriptionFields
-        List<ReferenceDomainDescriptionFields> mockClaimStatusList = Arrays.asList(
-                createMockReferenceDomainDescriptionFields("Pend_pre_payment_COB_investigation"),
-                createMockReferenceDomainDescriptionFields("Paid"),
-                createMockReferenceDomainDescriptionFields("Withdrawn_registered_in_error"),
-                createMockReferenceDomainDescriptionFields("Some_Other_Code")
-        );
+    // Add your assertions here based on the expected behavior of onDropDownSubmit
+    // For example, you can expect that certain methods were called or properties were set correctly.
+  });
 
-        // Mock the behavior of the container to return the list of mock claim statuses
-        when(mockContainer.getClaimStatus()).thenReturn(new ReferenceDomainDescription());
-        when(mockContainer.getClaimStatus().getDataList()).thenReturn(mockClaimStatusList);
-
-        // Call the method to populate claim status by disposition
-        claimStatusCodeSubSet.populateClaimStatusByDisposition(mockContainer);
-
-        // Verify that the corresponding sets in the container have been populated correctly
-        verify(mockContainer).setClaimPendStatus(any());
-        verify(mockContainer).setClaimIncrementStatus(any());
-        verify(mockContainer).setClaimWithdrawStatus(any());
-        verify(mockContainer).setClaimReleaseStatus(any());
-        verify(mockContainer).setClaimDenyStatus(any());
-        verify(mockContainer).setClaimFinalizedStatus(any());
-        verify(mockContainer).setClaimCloseStatus(any());
-
-        // Get the populated sets from the container
-        Set<String> pendStatus = claimStatusCodeSubSet.getPendStatusCodes();
-        Set<String> incrementStatus = claimStatusCodeSubSet.getIncrementReasonCodes();
-        Set<String> withdrawStatus = claimStatusCodeSubSet.getWithdrawStatusCodes();
-        Set<String> releaseStatus = claimStatusCodeSubSet.getReleaseStatusCodes();
-        Set<String> denyStatus = claimStatusCodeSubSet.getDenyStatusCodes();
-        Set<String> finalizedStatus = claimStatusCodeSubSet.getFinalizedStatusCodes();
-        Set<String> closeStatus = claimStatusCodeSubSet.getCloseStatusCodes();
-
-        // Verify that the sets contain the expected values
-        assertTrue(pendStatus.contains("Pend_pre_payment_COB_investigation"));
-        assertFalse(pendStatus.contains("Paid"));
-
-        assertTrue(incrementStatus.contains(ClaimIncrementReasonCode.SOME_REASON_CODE.code()));
-        assertFalse(incrementStatus.contains("Withdrawn_registered_in_error"));
-
-        assertTrue(withdrawStatus.contains(ClaimStatusCode.Withdrawn_registered_in_error.code()));
-        assertFalse(withdrawStatus.contains("Paid"));
-
-        assertTrue(releaseStatus.contains(ClaimStatusCode.Paid.code()));
-        assertFalse(releaseStatus.contains("Withdrawn_registered_in_error"));
-
-        assertTrue(denyStatus.contains(ClaimStatusCode.BIS_claim_disapproved.code()));
-        assertFalse(denyStatus.contains("Paid"));
-
-        assertTrue(finalizedStatus.contains(ClaimStatusCode.BIS_claim_paid.code()));
-        assertFalse(finalizedStatus.contains("Withdrawn_registered_in_error"));
-
-        assertTrue(closeStatus.contains(ClaimStatusCode.Claim_closed_for_COB_investigation_issued_no_payment.code()));
-        assertFalse(closeStatus.contains("Paid"));
-    }
-
-    private ReferenceDomainDescriptionFields createMockReferenceDomainDescriptionFields(String code) {
-        ReferenceDomainDescriptionFields mockField = mock(ReferenceDomainDescriptionFields.class);
-        when(mockField.getValue()).thenReturn(code);
-        return mockField;
-    }
-}
-
+  // Add more test cases as needed for your component's methods and behavior.
+});
