@@ -1,62 +1,137 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TabSectionHeaderComponent } from './tab-section-header.component';
-import { Angulartics2LaunchByAdobe } from 'ui-commons'; // Import your dependencies here
+import { TestBed, inject } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { ClaimsInquiryControllerService } from './claims-inquiry-controller.service';
+import { ClaimsRequest } from '../models/claimsRequest';
+import { CodeReferenceRequest } from '../models/codeReferenceRequest';
+import { ReferenceDataRequest } from '../models/referenceDataRequest';
 
-describe('TabSectionHeaderComponent', () => {
-  let component: TabSectionHeaderComponent;
-  let fixture: ComponentFixture<TabSectionHeaderComponent>;
-  let adobeAnalyticsMock: Partial<Angulartics2LaunchByAdobe>;
-  let windowSpy: jasmine.SpyObj<Window>;
-
-  beforeEach(async () => {
-    // Mock dependencies
-    adobeAnalyticsMock = {
-      eventTrack: jasmine.createSpy('eventTrack')
-    };
-
-    windowSpy = jasmine.createSpyObj<Window>('window', ['open']);
-
-    await TestBed.configureTestingModule({
-      declarations: [TabSectionHeaderComponent],
-      providers: [
-        { provide: Angulartics2LaunchByAdobe, useValue: adobeAnalyticsMock },
-        { provide: Window, useValue: windowSpy }
-      ]
-    }).compileComponents();
-  });
+describe('ClaimsInquiryControllerService', () => {
+  let service: ClaimsInquiryControllerService;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TabSectionHeaderComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [ClaimsInquiryControllerService]
+    });
+
+    service = TestBed.inject(ClaimsInquiryControllerService);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    httpTestingController.verify();
   });
 
-  it('should open a new tab with the current window location', () => {
-    component.openInNewTab();
-
-    // Expect that the window.open method was called with the current window location
-    expect(windowSpy.open).toHaveBeenCalledWith(window.location.href, '_blank');
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 
-  it('should open a new tab with the provided URL', () => {
-    const url = 'https://example.com';
-    component.openNewTab(url);
+  it('should make a POST request for getClaimSummary', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const claimsRequest: ClaimsRequest = { /* create a ClaimsRequest object */ };
+      const response = { /* create a mock response object */ };
 
-    // Expect that the window.open method was called with the provided URL
-    expect(windowSpy.open).toHaveBeenCalledWith(url, '_blank');
-  });
+      service.getClaimSummaryUsingPOST(claimsRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
 
-  it('should track analytics event and open a new tab when externalBadgeLinkClicked is called', () => {
-    const badge = { analyticsEvent: 'badgeClicked', url: 'https://example.com' };
-    component.externalBadgeLinkClicked(badge);
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/claim-summary`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
 
-    // Expect that the analytics event was tracked
-    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('badgeClicked');
-    // Expect that the window.open method was called with the badge's URL
-    expect(windowSpy.open).toHaveBeenCalledWith(badge.url, '_blank');
-  });
+  it('should make a POST request for getCodeReference', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const codeReferenceRequest: CodeReferenceRequest = { /* create a CodeReferenceRequest object */ };
+      const response = { /* create a mock response object */ };
+
+      service.getCodeReferenceUsingPOST(codeReferenceRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
+
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/code-reference`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
+
+  it('should make a POST request for getPatientDetails', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const claimsRequest: ClaimsRequest = { /* create a ClaimsRequest object */ };
+      const response = { /* create a mock response object */ };
+
+      service.getPatientDetailsUsingPOST(claimsRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
+
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/patient-details`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
+
+  it('should make a POST request for getProviderDetails', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const claimsRequest: ClaimsRequest = { /* create a ClaimsRequest object */ };
+      const response = { /* create a mock response object */ };
+
+      service.getProviderDetailsUsingPOST(claimsRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
+
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/provider-details`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
+
+  it('should make a POST request for getClaimDetails', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const claimsRequest: ClaimsRequest = { /* create a ClaimsRequest object */ };
+      const response = { /* create a mock response object */ };
+
+      service.getClaimDetailsUsingPOST(claimsRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
+
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/claim-details`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
+
+  it('should make a POST request for getReferenceData', inject(
+    [HttpTestingController],
+    (httpClient: HttpTestingController) => {
+      const referenceDataRequest: ReferenceDataRequest = { /* create a ReferenceDataRequest object */ };
+      const response = { /* create a mock response object */ };
+
+      service.getReferenceDataUsingPOST(referenceDataRequest).subscribe((data) => {
+        expect(data).toEqual(response);
+      });
+
+      const req = httpTestingController.expectOne(
+        `${service.basePath}/claims/v1/reference-data`
+      );
+      expect(req.request.method).toBe('POST');
+      req.flush(response);
+    }
+  ));
 });
