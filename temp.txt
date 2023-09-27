@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabSectionHeaderComponent } from './tab-section-header.component';
-import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons'; // Import your dependencies here
+import { Angulartics2LaunchByAdobe } from 'ui-commons'; // Import your dependencies here
 
 describe('TabSectionHeaderComponent', () => {
   let component: TabSectionHeaderComponent;
   let fixture: ComponentFixture<TabSectionHeaderComponent>;
   let adobeAnalyticsMock: Partial<Angulartics2LaunchByAdobe>;
-  let requestBuilderMock: Partial<RequestBuilder>;
+  let windowSpy: jasmine.SpyObj<Window>;
 
   beforeEach(async () => {
     // Mock dependencies
@@ -14,16 +14,13 @@ describe('TabSectionHeaderComponent', () => {
       eventTrack: jasmine.createSpy('eventTrack')
     };
 
-    requestBuilderMock = {
-      mapRequest: jasmine.createSpy('mapRequest'),
-      store: jasmine.createSpy('store')
-    };
+    windowSpy = jasmine.createSpyObj<Window>('window', ['open']);
 
     await TestBed.configureTestingModule({
       declarations: [TabSectionHeaderComponent],
       providers: [
         { provide: Angulartics2LaunchByAdobe, useValue: adobeAnalyticsMock },
-        { provide: RequestBuilder, useValue: requestBuilderMock }
+        { provide: Window, useValue: windowSpy }
       ]
     }).compileComponents();
   });
@@ -38,20 +35,28 @@ describe('TabSectionHeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should handle onDropDownSubmit with currentValue as the first option', () => {
-    // Set up test data and trigger the method
-    component.patientDetails = { memberId: '123456', claimFromDate: '2023-01-01' };
-    component.viewAdditionalDetailsOptions = ['Option1', 'Option2', 'Option3', 'Option4'];
+  it('should open a new tab with the current window location', () => {
+    component.openInNewTab();
 
-    const event = { currentValue: component.viewAdditionalDetailsOptions[0] };
-    component.onDropDownSubmit(event);
-
-    // Add your expectations here, e.g., check if methods were called with the expected arguments
-    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('cl_select_view_additional_claims');
-    expect(requestBuilderMock.mapRequest).toHaveBeenCalledOnceWith(/* ...expected parameters... */);
-    expect(requestBuilderMock.store).toHaveBeenCalledTimes(/* ...expected number of times... */);
-    // Add more assertions based on your test requirements
+    // Expect that the window.open method was called with the current window location
+    expect(windowSpy.open).toHaveBeenCalledWith(window.location.href, '_blank');
   });
 
-  // Add similar test cases for other currentValue options, e.g., currentValue as the second, third, and fourth options.
+  it('should open a new tab with the provided URL', () => {
+    const url = 'https://example.com';
+    component.openNewTab(url);
+
+    // Expect that the window.open method was called with the provided URL
+    expect(windowSpy.open).toHaveBeenCalledWith(url, '_blank');
+  });
+
+  it('should track analytics event and open a new tab when externalBadgeLinkClicked is called', () => {
+    const badge = { analyticsEvent: 'badgeClicked', url: 'https://example.com' };
+    component.externalBadgeLinkClicked(badge);
+
+    // Expect that the analytics event was tracked
+    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('badgeClicked');
+    // Expect that the window.open method was called with the badge's URL
+    expect(windowSpy.open).toHaveBeenCalledWith(badge.url, '_blank');
+  });
 });
