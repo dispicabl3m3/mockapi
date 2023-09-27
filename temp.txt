@@ -135,3 +135,43 @@ describe('ClaimsInquiryControllerService', () => {
     }
   ));
 });
+
+
+
+
+
+import { TestBed, inject } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { ClaimsInquiryControllerService } from './claims-inquiry-controller.service';
+import { ClaimsRequest } from '../models/claimsRequest';
+import { CodeReferenceRequest } from '../models/codeReferenceRequest';
+import { ReferenceDataRequest } from '../models/referenceDataRequest';
+
+describe('ClaimsInquiryControllerService', () => {
+  let service: ClaimsInquiryControllerService;
+  let httpTestingController: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        ClaimsInquiryControllerService,
+        { provide: 'BASE_PATH', useValue: 'https://example.com' } // Provide a custom basePath for testing
+      ]
+    });
+
+    service = TestBed.inject(ClaimsInquiryControllerService);
+    httpTestingController = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpTestingController.verify();
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+
+  // Rest of the test cases remain the same as in the previous response
+  // ...
+});
