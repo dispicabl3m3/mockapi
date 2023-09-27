@@ -1,29 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute } from '@angular/router';
-import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons'; // Import your dependencies here
-
 import { TabSectionHeaderComponent } from './tab-section-header.component';
+import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons'; // Import your dependencies here
 
 describe('TabSectionHeaderComponent', () => {
   let component: TabSectionHeaderComponent;
   let fixture: ComponentFixture<TabSectionHeaderComponent>;
+  let adobeAnalyticsMock: Partial<Angulartics2LaunchByAdobe>;
+  let requestBuilderMock: Partial<RequestBuilder>;
 
   beforeEach(async () => {
+    // Mock dependencies
+    adobeAnalyticsMock = {
+      eventTrack: jasmine.createSpy('eventTrack')
+    };
+
+    requestBuilderMock = {
+      mapRequest: jasmine.createSpy('mapRequest'),
+      store: jasmine.createSpy('store')
+    };
+
     await TestBed.configureTestingModule({
       declarations: [TabSectionHeaderComponent],
-      imports: [RouterTestingModule],
       providers: [
-        Angulartics2LaunchByAdobe,
-        RequestBuilder,
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              routeConfig: { path: 'test-path' } // Mock ActivatedRoute snapshot
-            }
-          }
-        }
+        { provide: Angulartics2LaunchByAdobe, useValue: adobeAnalyticsMock },
+        { provide: RequestBuilder, useValue: requestBuilderMock }
       ]
     }).compileComponents();
   });
@@ -38,20 +38,20 @@ describe('TabSectionHeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should handle onDropDownSubmit correctly', () => {
-    // Mock data for input properties
-    component.providerDetails = {};
-    component.patientDetails = {
-      claimFromDate: '2023-01-01',
-      memberId: '123456'
-    };
+  it('should handle onDropDownSubmit with currentValue as the first option', () => {
+    // Set up test data and trigger the method
+    component.patientDetails = { memberId: '123456', claimFromDate: '2023-01-01' };
+    component.viewAdditionalDetailsOptions = ['Option1', 'Option2', 'Option3', 'Option4'];
 
-    // Simulate a dropdown submit event
-    component.onDropDownSubmit({ currentValue: component.viewAdditionalDetailsOptions[0] });
+    const event = { currentValue: component.viewAdditionalDetailsOptions[0] };
+    component.onDropDownSubmit(event);
 
-    // Add your assertions here based on the expected behavior of onDropDownSubmit
-    // For example, you can expect that certain methods were called or properties were set correctly.
+    // Add your expectations here, e.g., check if methods were called with the expected arguments
+    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('cl_select_view_additional_claims');
+    expect(requestBuilderMock.mapRequest).toHaveBeenCalledOnceWith(/* ...expected parameters... */);
+    expect(requestBuilderMock.store).toHaveBeenCalledTimes(/* ...expected number of times... */);
+    // Add more assertions based on your test requirements
   });
 
-  // Add more test cases as needed for your component's methods and behavior.
+  // Add similar test cases for other currentValue options, e.g., currentValue as the second, third, and fourth options.
 });
