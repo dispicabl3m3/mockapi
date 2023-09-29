@@ -1,110 +1,86 @@
-import { TestBed, inject } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ClaimsInquiryControllerService } from './claims-inquiry-controller.service';
-import { ClaimsRequest } from '../models/claimsRequest';
-import { CodeReferenceRequest } from '../models/codeReferenceRequest';
-import { ReferenceDataRequest } from '../models/referenceDataRequest';
-import { Configuration } from './configuration';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons';
+import { of } from 'rxjs';
 
-describe('ClaimsInquiryControllerService', () => {
-  let service: ClaimsInquiryControllerService;
-  let httpMock: HttpTestingController;
+import { TabSectionHeaderComponent } from './tab-section-header.component';
+import { ClaimSummaryService } from '../shared/services/claim-summary.service';
+
+describe('TabSectionHeaderComponent', () => {
+  let component: TabSectionHeaderComponent;
+  let fixture: ComponentFixture<TabSectionHeaderComponent>;
+
+  // Mocks
+  const activatedRouteMock = {
+    snapshot: {
+      routeConfig: {
+        path: 'testPath',
+      },
+    },
+    parent: null, // You can provide more details if needed
+  };
+
+  const routerMock = {
+    serializeUrl: jasmine.createSpy('serializeUrl').and.returnValue('testUrl'),
+    createUrlTree: jasmine.createSpy('createUrlTree'),
+  };
+
+  const claimSummaryServiceMock = {
+    getServiceFromMinusYearDate: () => 'testServiceFromMinusYearDate',
+    getTodaysServiceFromDate: () => 'testTodaysServiceFromDate',
+    getEpochFromDate: () => 'testEpochFromDate',
+  };
+
+  const adobeAnalyticsMock = {
+    eventTrack: jasmine.createSpy('eventTrack'),
+  };
+
+  const requestBuilderMock = {
+    mapRequest: () => {},
+    store: () => {},
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [TabSectionHeaderComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: Router, useValue: routerMock },
+        { provide: ClaimSummaryService, useValue: claimSummaryServiceMock },
+        { provide: Angulartics2LaunchByAdobe, useValue: adobeAnalyticsMock },
+        { provide: RequestBuilder, useValue: requestBuilderMock },
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
-        ClaimsInquiryControllerService,
-        { provide: Configuration, useValue: { basePath: 'https://example.com' } }
-      ],
-    });
-    service = TestBed.inject(ClaimsInquiryControllerService);
-    httpMock = TestBed.inject(HttpTestingController);
+    fixture = TestBed.createComponent(TabSectionHeaderComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  afterEach(() => {
-    httpMock.verify();
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('should call adobeAnalytics.eventTrack when onDropDownSubmit is called', () => {
+    spyOn(component, 'onSelectOfDropdownOpenInNewTab');
+    const event = { currentValue: 'testValue' };
+    component.onDropDownSubmit(event);
+    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('cl_select_view_additional_claims');
   });
 
-  it('should getClaimSummaryUsingPOST', () => {
-    const claimsRequest: ClaimsRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getClaimSummaryUsingPOST(claimsRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/claim-summary');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
+  it('should call onSelectOfDropdownOpenInNewTab with "claimsclientmemberid" when onDropDownSubmit is called with the first option', () => {
+    const event = { currentValue: 'Find Patient Claims (via Member ID)' };
+    component.onDropDownSubmit(event);
+    expect(component.onSelectOfDropdownOpenInNewTab).toHaveBeenCalledWith('claimsclientmemberid');
   });
 
-  it('should getCodeReferenceUsingPOST', () => {
-    const codeReferenceRequest: CodeReferenceRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getCodeReferenceUsingPOST(codeReferenceRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/code-reference');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
+  it('should call onSelectOfDropdownOpenInNewTab with "claimsgroup" when onDropDownSubmit is called with the third option', () => {
+    const event = { currentValue: 'Find Additional Claims (via ID/Group ID)' };
+    component.onDropDownSubmit(event);
+    expect(component.onSelectOfDropdownOpenInNewTab).toHaveBeenCalledWith('claimsgroup');
   });
 
-  it('should getPatientDetailsUsingPOST', () => {
-    const claimsRequest: ClaimsRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getPatientDetailsUsingPOST(claimsRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/patient-details');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
-  });
-
-  it('should getProviderDetailsUsingPOST', () => {
-    const claimsRequest: ClaimsRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getProviderDetailsUsingPOST(claimsRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/provider-details');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
-  });
-
-  it('should getClaimDetailsUsingPOST', () => {
-    const claimsRequest: ClaimsRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getClaimDetailsUsingPOST(claimsRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/claim-details');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
-  });
-
-  it('should getReferenceDataUsingPOST', () => {
-    const referenceDataRequest: ReferenceDataRequest = { /* fill with test data */ };
-    const expectedResponse = { /* fill with expected response data */ };
-
-    service.getReferenceDataUsingPOST(referenceDataRequest).subscribe((response) => {
-      expect(response).toEqual(expectedResponse);
-    });
-
-    const request = httpMock.expectOne('https://example.com/claims/v1/reference-data');
-    expect(request.request.method).toBe('POST');
-    request.flush(expectedResponse);
-  });
+  // Add more test cases as needed
 });
