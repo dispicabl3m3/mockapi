@@ -1,8 +1,4 @@
-/**
- * Claims UI Inquiry Service API
- *
- */
-/* tslint:disable:no-unused-variable member-ordering */
+
 
 import { Inject, Injectable, Optional } from '@angular/core';
 import {
