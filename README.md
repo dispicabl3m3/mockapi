@@ -1,313 +1,222 @@
-/**
- * Claims UI Inquiry Service API
- *
- */
-/* tslint:disable:no-unused-variable member-ordering */
+import { Component, OnInit, Inject } from '@angular/core';
+import { Angulartics2LaunchByAdobe, RequestBuilder, MeterData } from 'ui-commons';
+import { map, catchError, finalize, tap } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CLAIM_ID_ROUTE_PARAMETER } from '../shared/services/variables';
+import { ModalService, ServerErrorModalComponent } from 'ui-commons';
+import { ClaimDataService, Constants } from '../../../claims-ui-claims-inquiry-services-module/src/projects';
+import { ClaimsCassErrorData, ClaimsInformationResponse } from '../shared/models/claimsInformationResponse';
+import { ClaimInquirySummaryResponse, ServicesAndPaymentsSummary, ServicesAndPaymentsTab } from '../shared/models/models';
+@Component({
+  selector: 'claim-service-tab',
+  templateUrl: './service-details-tab.component.html',
+  styleUrls: ['./service-details-tab.component.scss']
+})
 
-import { Inject, Injectable, Optional } from '@angular/core';
-import {
-    HttpClient, HttpHeaders, HttpParams,
-    HttpResponse, HttpEvent
-} from '@angular/common/http';
+export class ServiceTabComponent implements OnInit {
 
-import { Observable } from 'rxjs/Observable';
+  serviceTabHeaderContent: {};
+  claimsInquiry: Observable<ServicesAndPaymentsSummary>;
+  claimSummary: Observable<ClaimInquirySummaryResponse>;
+  servicesAndPaymentDetails: ServicesAndPaymentsTab;
+  isLoading = false;
+  serverError: string = null;
+  copayData: ClaimsInformationResponse;
+  coinsuranceData: ClaimsInformationResponse;
+  deductibleData: ClaimsInformationResponse;
+  outOfPocketData: ClaimsInformationResponse;
+  cassError: ClaimsCassErrorData;
+  // temporary default values
+  defaultAmountLimit = 0;
+  defaultAmountUsed = 0;
+  noDataFound = false;
 
-import { ModelAndView } from '../models/modelAndView';
+  showLegacyMessageBanner = false;
 
-import { BASE_PATH } from './variables';
-import { Configuration } from './configuration';
+  showSystemErrorBanner = false;
 
+  showNoDataBanner = false;
 
-@Injectable()
-export class BasicErrorControllerService {
+  constructor(@Inject('env') private env: any,
+    private adobeAnalytics: Angulartics2LaunchByAdobe,
+    private claimDataService: ClaimDataService,
+    public requestBuilder: RequestBuilder,
+    private router: Router,
+    private route: ActivatedRoute,
+    public modal: ModalService) { }
 
-    protected basePath = 'https://claims-ui-inquiry-service-v1-uit9.cfaa.azr.hcsctest.net';
-    public defaultHeaders = new HttpHeaders();
-    public configuration = new Configuration();
+  ngOnInit(): void {
+    this.adobeAnalytics.eventTrack('cl_click_service_tab');
+    this.isLoading = true;
+    this.serverError = null;
+    const claimIdentifier = this.route.snapshot.parent.paramMap.get(CLAIM_ID_ROUTE_PARAMETER);
 
-    constructor(protected httpClient: HttpClient, @Optional()@Inject(BASE_PATH) basePath: string, @Optional() configuration: Configuration) {
-        if (basePath) {
-            this.basePath = basePath;
-        }
-        if (configuration) {
-            this.configuration = configuration;
-            this.basePath = basePath || configuration.basePath || this.basePath;
-        }
-    }
-
-    /**
-     * @param consumes string[] mime-types
-     * @return true: consumes contains 'multipart/form-data', false: otherwise
-     */
-    private canConsumeForm(consumes: string[]): boolean {
-        const form = 'multipart/form-data';
-        for (const consume of consumes) {
-            if (form === consume) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingDELETE(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingDELETE(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingDELETE(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingDELETE(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.delete<ModelAndView>(`${this.basePath}/error`,
+    this.claimsInquiry = this.claimDataService
+      .dispatchClaimsInquiry('service-payment-details', 'servicePaymentDetails', { claimIdentifier })
+      .pipe(map(({ data }) => data),
+        tap(data => {
+          this.servicesAndPaymentDetails = data;
+          this.mappingResponse();
+          this.serviceTabHeaderContent = {
+            title: "Services & Payments",
+            openNewTabLink: false,
+            tags: [],
+            badges: [{
+              name: "View Premier Pricing",
+              className: "badge",
+              url: this.env.viewPremierPricing,
+              analyticsEvent: 'cl_click_view_premier_pricing'
+            },
             {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
+              name: "View Member Accums",
+              className: "badge",
+              url: this.getViewMemberAccumsLink(data?.cbdRouterIndicator),
+              analyticsEvent: 'cl_click_view_member_accums'
+            }],
+            timeStamp: data.claimsInformationResponse[0].cassError?.timeStamp,
+            referenceNumber: data.claimsInformationResponse[0].cassError?.referenceNumber
+          }
+
+          if (data?.cbdRouterIndicator === 'K') {
+            this.checkSessionStorageData();
+          }
+
+          if (data.claimsInformationResponse[0].cassError?.systemError === true) {
+            this.showSystemErrorBanner = true;
+          }
+          else if (data.claimsInformationResponse[0].cassError?.systemError === false) {
+            this.showNoDataBanner = true;
+          }
+        }),
+        catchError(error => {
+          this.serverError = error.error;
+          of(this.openServerErrorModal(error));
+          return throwError(error);
+        }),
+        finalize(() => this.isLoading = false)
+      );
+  }
+
+  checkSessionStorageData() {
+    const clmId = sessionStorage.getItem('ACCUMS_INFO_CLM_ID');
+    const queryData = {
+      claimIdentifier: this.route.snapshot.parent.paramMap.get(CLAIM_ID_ROUTE_PARAMETER)
+    };
+    if (!clmId || clmId !== queryData?.claimIdentifier) {
+      this.claimDataService
+        .dispatchClaimsInquiry('claim-summary', 'claimSummary', queryData).pipe(
+          map(({ data: { claimInquirySummaryResponse } }) => claimInquirySummaryResponse),
+          catchError(error => of(this.openServerErrorModal(error))),
+          finalize(() => this.isLoading = false)
+        ).subscribe(data => {
+          this.setAccumsSummaryDetailsInSession(data?.patient, queryData?.claimIdentifier);
+        });
     }
 
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingGET(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingGET(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingGET(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingGET(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+  }
 
-        let headers = this.defaultHeaders;
+  setAccumsSummaryDetailsInSession(patientSummary, clmId) {
+    const subId = patientSummary?.subscriberId;
+    const grpId = patientSummary?.groupId;
+    const setAccumsData = {
+      corporateEntityCode: patientSummary?.corporateEntityCode.length === 3 ?
+        patientSummary?.corporateEntityCode : patientSummary?.corporateEntityCode + '1',
+      groupNumber: grpId?.substr(-6),
+      memberPartyId: patientSummary?.memberId,
+      policyEffectiveEndEpoch: patientSummary?.policyEffectiveEndDate,
+      policyEffectiveStartEpoch: patientSummary?.policyEffectiveStartDate,
+      searchType: Constants.MEMBER_PARTY,
+      sectionNumber: patientSummary?.sectionNumber,
+      singleResult: true,
+      subscriberId: subId?.substr(-12),
+      subscriberPartyId: patientSummary?.subscriberPartyId
+    };
+    const request = {
+      memberPartyId: setAccumsData.memberPartyId?.toString(),
+      subpartyId: ''
+    };
+    this.requestBuilder.store(Constants.MEMBER_PARTY_FORM_KEY, request);
+    this.requestBuilder.store(Constants.MEMBER_HISTORY_SEARCH_PARAMS, setAccumsData);
+    sessionStorage.setItem('SELECTED_GROUPNUMBER', setAccumsData?.groupNumber);
+    sessionStorage.setItem('ACCUMS_INFO_CLM_ID', clmId);
+    this.requestBuilder.store('SELECTED_MEMBER_PARTY_ID', parseInt(setAccumsData?.memberPartyId, 10));
+    this.requestBuilder.store('SELECTED_POLICY_EFFECTIVE_DATE', setAccumsData?.policyEffectiveStartEpoch);
 
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
+  }
 
-        // to determine the Content-Type header
-        const consumes: string[] = [
-        ];
-
-        return this.httpClient.get<ModelAndView>(`${this.basePath}/error`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
+  getViewMemberAccumsLink(cbdRouterIndicator) {
+    let viewAccumsUrl = '';
+    switch (cbdRouterIndicator) {
+      case '':
+        viewAccumsUrl = "LegacyMessageBanner";
+        break;
+      case 'L':
+        viewAccumsUrl = "LegacyMessageBanner";
+        break;
+      case 'N':
+        viewAccumsUrl = this.env.viewMemberAccums;
+        break;
+      case 'K':
+        viewAccumsUrl = window.location.origin + '/accums-ui/member/member-detail/accums-ui/summary';
+        break;
     }
+    return viewAccumsUrl;
+  }
 
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingHEAD(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingHEAD(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingHEAD(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingHEAD(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+  getDeductibleData(): MeterData {
+    const data: MeterData = {
+      max: this.deductibleData?.accumLimit ? Number(this.deductibleData?.accumLimit) : this.defaultAmountLimit,
+      value: this.deductibleData?.amountUsed ? Number(this.deductibleData?.amountUsed) : this.defaultAmountUsed
+    };
+    return data;
+  }
 
-        let headers = this.defaultHeaders;
+  getOutOfPocketData(): MeterData {
+    const data: MeterData = {
+      max: this.outOfPocketData?.accumLimit ? Number(this.outOfPocketData?.accumLimit) : this.defaultAmountLimit,
+      value: this.outOfPocketData?.amountUsed ? Number(this.outOfPocketData?.amountUsed) : this.defaultAmountUsed
+    };
+    return data;
+  }
 
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
+  mappingResponse() {
+    this.cassError = (this.servicesAndPaymentDetails.claimsInformationResponse as any[]).find(val => val.cassError)?.cassError;
 
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-
-        return this.httpClient.head<ModelAndView>(`${this.basePath}/error`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
+    if (this.cassError) {
+      this.noDataFound = true;
+    } else {
+      this.copayData = this.getAmounts('COPAY');
+      this.coinsuranceData = this.getAmounts('COINSURANCE');
+      this.deductibleData = this.getAmounts('DEDUCTIBLE');
+      this.outOfPocketData = this.getAmounts('OUT_OF_POCKET');
     }
+  }
 
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingOPTIONS(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingOPTIONS(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingOPTIONS(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingOPTIONS(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+  getAmounts(accumType: string): ClaimsInformationResponse {
+    let tempValue = (this.servicesAndPaymentDetails.claimsInformationResponse as any[]).find(
+      val => val.familyorIndividualIndicator === 'INDIVIDUAL' &&
+        val.accumType === accumType
+    );
+    return tempValue;
+  }
 
-        let headers = this.defaultHeaders;
+  openServerErrorModal(error) {
+    this.modal.openModal(ServerErrorModalComponent, {
+      navigateTo: [],
+      error: error,
+      params: {
+        relativeTo: this.route
+      }
+    }).onClose()
+      .subscribe(() => this.goBack());
+  }
 
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-
-        return this.httpClient.options<ModelAndView>(`${this.basePath}/error`,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
+  goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      this.router.navigate(['..'], { relativeTo: this.route.parent });
     }
-
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingPATCH(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingPATCH(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingPATCH(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingPATCH(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-
-        return this.httpClient.patch<ModelAndView>(`${this.basePath}/error`,
-            null,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
-    }
-
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingPOST(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingPOST(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingPOST(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingPOST(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-
-        return this.httpClient.post<ModelAndView>(`${this.basePath}/error`,
-            null,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
-    }
-
-    /**
-     * errorHtml
-     *
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public errorHtmlUsingPUT(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
-    public errorHtmlUsingPUT(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
-    public errorHtmlUsingPUT(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
-    public errorHtmlUsingPUT(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
-
-        let headers = this.defaultHeaders;
-
-        // to determine the Accept header
-        const httpHeaderAccepts: string[] = [
-            'text/html'
-        ];
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
-        if (httpHeaderAcceptSelected !== undefined) {
-            headers = headers.set('Accept', httpHeaderAcceptSelected);
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ];
-
-        return this.httpClient.put<ModelAndView>(`${this.basePath}/error`,
-            null,
-            {
-                withCredentials: this.configuration.withCredentials,
-                headers,
-                observe,
-                reportProgress
-            }
-        );
-    }
-
+  }
 }
