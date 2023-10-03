@@ -1,127 +1,313 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons';
-import { ClientMemberIdModel, ClientMemberIdMapper, GroupModel, GroupMapper, Constants } from '../../../claims-ui-claims-inquiry-services-module/src/projects';
-import { SearchRequest } from '../../../model/searchRequest';
-import { ClaimSummaryService } from '../shared/services/claim-summary.service';
+/**
+ * Claims UI Inquiry Service API
+ *
+ */
+/* tslint:disable:no-unused-variable member-ordering */
 
-@Component({
-  selector: 'tab-section-header',
-  templateUrl: './tab-section-header.component.html',
-  styleUrls: ['./tab-section-header.component.scss']
-})
+import { Inject, Injectable, Optional } from '@angular/core';
+import {
+    HttpClient, HttpHeaders, HttpParams,
+    HttpResponse, HttpEvent
+} from '@angular/common/http';
 
-export class TabSectionHeaderComponent implements OnInit {
+import { Observable } from 'rxjs/Observable';
 
-  @Input() headerContent;
+import { ModelAndView } from '../models/modelAndView';
 
-  @Input() providerDetails;
+import { BASE_PATH } from './variables';
+import { Configuration } from './configuration';
 
-  @Input() patientDetails;
-  screenName;
-  loadDropdownContent;
-  claimDateFormat: any;
-  today: any;
-  data: any;
-  viewAdditionalDetailsOptions = ['Find Patient Claims (via Member ID)', 'Find Patient Claims (via Member ID and Service Dates)', 'Find Additional Claims (via ID/Group ID)', 'Find Additional Claims (via ID/Group ID and Service Dates)'];
-  claimCorporateEntityCodes: any = [];
-  subIdCorporateEntityCodes: any = [];
-  defaultCorporateEntityCodes: any = [];
 
-  constructor(private route: ActivatedRoute,
-    private adobeAnalytics: Angulartics2LaunchByAdobe,
-    public requestBuilder: RequestBuilder,
-    private component: ClaimSummaryService,
-    private router: Router
-  ) {
-  }
+@Injectable()
+export class BasicErrorControllerService {
 
-  ngOnInit(): void {
-    this.screenName = this.route.snapshot.routeConfig.path;
-    this.loadDropdownContent = this.providerDetails;
-  }
+    protected basePath = 'https://claims-ui-inquiry-service-v1-uit9.cfaa.azr.hcsctest.net';
+    public defaultHeaders = new HttpHeaders();
+    public configuration = new Configuration();
 
-  onDropDownSubmit(event) {
-    this.adobeAnalytics.eventTrack('cl_select_view_additional_claims');
-    this.claimDateFormat = new Date(this.patientDetails?.claimFromDate);
-    this.today = new Date();
-    if (event.currentValue === this.viewAdditionalDetailsOptions[0]) {
-      this.data = {
-        corporateEntityCodes: this.claimCorporateEntityCodes.length > 0 ? this.claimCorporateEntityCodes : this.defaultCorporateEntityCodes,
-        clientMemberId: this.patientDetails?.memberId,
-        serviceFromDate: this.component.getServiceFromMinusYearDate(this.claimDateFormat),
-        serviceToDate: { formatted: this.today, epoc: this.component.getEpochFromDate(this.today) },
-        dispositionFromDate: '',
-        dispositionToDate: ''
-      };
-      this.requestBuilder.mapRequest<ClientMemberIdModel, SearchRequest>(Constants.CLAIMS_SEARCH_REQUEST_KEY, this.data as ClientMemberIdModel, new ClientMemberIdMapper());
-      this.requestBuilder.store(Constants.CLAIMS_CLIENT_MEMBER_ID_FORM_KEY, this.data);
-      this.requestBuilder.store(Constants.CLAIMS_SEARCH_TYPE_KEY, Constants.ClaimsStorageValues.CLAIMSCLIENTMEMBERID);
-      this.onSelectOfDropdownOpenInNewTab('claimsclientmemberid');
-    } else if (event.currentValue === this.viewAdditionalDetailsOptions[1]) {
-      this.data = {
-        corporateEntityCodes: this.claimCorporateEntityCodes.length > 0 ? this.claimCorporateEntityCodes : this.defaultCorporateEntityCodes,
-        clientMemberId: this.patientDetails?.memberId,
-        serviceFromDate: this.component.getTodaysServiceFromDate(this.claimDateFormat),
-        serviceToDate: this.component.getTodaysServiceFromDate(this.today),
-        dispositionFromDate: '',
-        dispositionToDate: ''
-      };
-      this.requestBuilder.mapRequest<ClientMemberIdModel, SearchRequest>(Constants.CLAIMS_SEARCH_REQUEST_KEY, this.data as ClientMemberIdModel, new ClientMemberIdMapper());
-      this.requestBuilder.store(Constants.CLAIMS_CLIENT_MEMBER_ID_FORM_KEY, this.data);
-      this.requestBuilder.store(Constants.CLAIMS_SEARCH_TYPE_KEY, Constants.ClaimsStorageValues.CLAIMSCLIENTMEMBERID);
-      this.onSelectOfDropdownOpenInNewTab('claimsclientmemberid');
-    } else if (event.currentValue === this.viewAdditionalDetailsOptions[2]) {
-      this.data = {
-        corporateEntityCodes: this.subIdCorporateEntityCodes.length > 0 ? this.subIdCorporateEntityCodes : this.defaultCorporateEntityCodes,
-        subscriberId: this.patientDetails?.subscriberId,
-        groupId: this.patientDetails?.groupId,
-        serviceFromDate: this.component.getServiceFromMinusYearDate(this.claimDateFormat),
-        serviceToDate: { formatted: this.today, epoc: this.component.getEpochFromDate(this.today) },
-        dispositionFromDate: '',
-        dispositionToDate: ''
-      };
-      this.requestBuilder.store(Constants.CLAIMS_GROUP_FORM_KEY, this.data);
-      this.requestBuilder.store(Constants.CLAIMS_SEARCH_TYPE_KEY, Constants.ClaimsStorageValues.CLAIMSGROUP);
-      this.requestBuilder.mapRequest<GroupModel, SearchRequest>(Constants.CLAIMS_SEARCH_REQUEST_KEY, this.data as GroupModel, new GroupMapper());
-      this.onSelectOfDropdownOpenInNewTab('claimsgroup');
-    } else if (event.currentValue === this.viewAdditionalDetailsOptions[3]) {
-      this.data = {
-        corporateEntityCodes: this.subIdCorporateEntityCodes.length > 0 ? this.subIdCorporateEntityCodes : this.defaultCorporateEntityCodes,
-        subscriberId: this.patientDetails?.subscriberId,
-        groupId: this.patientDetails?.groupId,
-        serviceFromDate: this.component.getTodaysServiceFromDate(this.claimDateFormat),
-        serviceToDate: this.component.getTodaysServiceFromDate(this.today),
-        dispositionFromDate: '',
-        dispositionToDate: ''
-      };
-      this.requestBuilder.store(Constants.CLAIMS_GROUP_FORM_KEY, this.data);
-      this.requestBuilder.store(Constants.CLAIMS_SEARCH_TYPE_KEY, Constants.ClaimsStorageValues.CLAIMSGROUP);
-      this.requestBuilder.mapRequest<GroupModel, SearchRequest>(Constants.CLAIMS_SEARCH_REQUEST_KEY, this.data as GroupModel, new GroupMapper());
-      this.onSelectOfDropdownOpenInNewTab('claimsgroup');
+    constructor(protected httpClient: HttpClient, @Optional()@Inject(BASE_PATH) basePath: string, @Optional() configuration: Configuration) {
+        if (basePath) {
+            this.basePath = basePath;
+        }
+        if (configuration) {
+            this.configuration = configuration;
+            this.basePath = basePath || configuration.basePath || this.basePath;
+        }
     }
-  }
 
-  onSelectOfDropdownOpenInNewTab(searchData) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree(
-        [`../../results`], { relativeTo: this.route.parent, queryParams: { searchType: searchData } }
-      ));
-    window.open(url, '_blank');
-  }
-
-  openInNewTab() {
-    window.open(window.location.href, '_blank');
-  }
-  
-  openNewTab(url) {
-    window.open(url, '_blank');
-  }
-
-  externalBadgeLinkClicked(badge) {
-    if(badge.analyticsEvent) {
-      this.adobeAnalytics.eventTrack(badge.analyticsEvent);
+    /**
+     * @param consumes string[] mime-types
+     * @return true: consumes contains 'multipart/form-data', false: otherwise
+     */
+    private canConsumeForm(consumes: string[]): boolean {
+        const form = 'multipart/form-data';
+        for (const consume of consumes) {
+            if (form === consume) {
+                return true;
+            }
+        }
+        return false;
     }
-    this.openNewTab(badge.url);
-  }
+
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingDELETE(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingDELETE(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingDELETE(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingDELETE(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.delete<ModelAndView>(`${this.basePath}/error`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingGET(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingGET(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingGET(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingGET(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+        ];
+
+        return this.httpClient.get<ModelAndView>(`${this.basePath}/error`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingHEAD(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingHEAD(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingHEAD(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingHEAD(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+
+        return this.httpClient.head<ModelAndView>(`${this.basePath}/error`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingOPTIONS(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingOPTIONS(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingOPTIONS(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingOPTIONS(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+
+        return this.httpClient.options<ModelAndView>(`${this.basePath}/error`,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingPATCH(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingPATCH(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingPATCH(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingPATCH(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+
+        return this.httpClient.patch<ModelAndView>(`${this.basePath}/error`,
+            null,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingPOST(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingPOST(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingPOST(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingPOST(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+
+        return this.httpClient.post<ModelAndView>(`${this.basePath}/error`,
+            null,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
+    /**
+     * errorHtml
+     *
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public errorHtmlUsingPUT(observe?: 'body', reportProgress?: boolean): Observable<ModelAndView>;
+    public errorHtmlUsingPUT(observe?: 'response', reportProgress?: boolean): Observable<HttpResponse<ModelAndView>>;
+    public errorHtmlUsingPUT(observe?: 'events', reportProgress?: boolean): Observable<HttpEvent<ModelAndView>>;
+    public errorHtmlUsingPUT(observe: any = 'body', reportProgress: boolean = false ): Observable<any> {
+
+        let headers = this.defaultHeaders;
+
+        // to determine the Accept header
+        const httpHeaderAccepts: string[] = [
+            'text/html'
+        ];
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        if (httpHeaderAcceptSelected !== undefined) {
+            headers = headers.set('Accept', httpHeaderAcceptSelected);
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+
+        return this.httpClient.put<ModelAndView>(`${this.basePath}/error`,
+            null,
+            {
+                withCredentials: this.configuration.withCredentials,
+                headers,
+                observe,
+                reportProgress
+            }
+        );
+    }
+
 }
