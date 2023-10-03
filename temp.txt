@@ -1,86 +1,57 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Angulartics2LaunchByAdobe, RequestBuilder } from 'ui-commons';
-import { of } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { TabSectionHeaderComponent } from './tab-section-header.component';
-import { ClaimSummaryService } from '../shared/services/claim-summary.service';
+import { BasicErrorControllerService } from './basic-error-controller.service';
+import { Configuration } from './configuration';
 
-describe('TabSectionHeaderComponent', () => {
-  let component: TabSectionHeaderComponent;
-  let fixture: ComponentFixture<TabSectionHeaderComponent>;
-
-  // Mocks
-  const activatedRouteMock = {
-    snapshot: {
-      routeConfig: {
-        path: 'testPath',
-      },
-    },
-    parent: null, // You can provide more details if needed
-  };
-
-  const routerMock = {
-    serializeUrl: jasmine.createSpy('serializeUrl').and.returnValue('testUrl'),
-    createUrlTree: jasmine.createSpy('createUrlTree'),
-  };
-
-  const claimSummaryServiceMock = {
-    getServiceFromMinusYearDate: () => 'testServiceFromMinusYearDate',
-    getTodaysServiceFromDate: () => 'testTodaysServiceFromDate',
-    getEpochFromDate: () => 'testEpochFromDate',
-  };
-
-  const adobeAnalyticsMock = {
-    eventTrack: jasmine.createSpy('eventTrack'),
-  };
-
-  const requestBuilderMock = {
-    mapRequest: () => {},
-    store: () => {},
-  };
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [TabSectionHeaderComponent],
-      providers: [
-        { provide: ActivatedRoute, useValue: activatedRouteMock },
-        { provide: Router, useValue: routerMock },
-        { provide: ClaimSummaryService, useValue: claimSummaryServiceMock },
-        { provide: Angulartics2LaunchByAdobe, useValue: adobeAnalyticsMock },
-        { provide: RequestBuilder, useValue: requestBuilderMock },
-      ],
-    }).compileComponents();
-  });
+describe('BasicErrorControllerService', () => {
+  let service: BasicErrorControllerService;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TabSectionHeaderComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        BasicErrorControllerService,
+        {
+          provide: Configuration,
+          useValue: {
+            withCredentials: false, // Set this based on your configuration needs
+          },
+        },
+      ],
+    });
+    service = TestBed.inject(BasicErrorControllerService);
+    httpTestingController = TestBed.inject(HttpTestingController);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    httpTestingController.verify();
   });
 
-  it('should call adobeAnalytics.eventTrack when onDropDownSubmit is called', () => {
-    spyOn(component, 'onSelectOfDropdownOpenInNewTab');
-    const event = { currentValue: 'testValue' };
-    component.onDropDownSubmit(event);
-    expect(adobeAnalyticsMock.eventTrack).toHaveBeenCalledWith('cl_select_view_additional_claims');
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 
-  it('should call onSelectOfDropdownOpenInNewTab with "claimsclientmemberid" when onDropDownSubmit is called with the first option', () => {
-    const event = { currentValue: 'Find Patient Claims (via Member ID)' };
-    component.onDropDownSubmit(event);
-    expect(component.onSelectOfDropdownOpenInNewTab).toHaveBeenCalledWith('claimsclientmemberid');
+  it('should send a DELETE request to errorHtml endpoint', () => {
+    const observe = 'body';
+    service.errorHtmlUsingDELETE(observe).subscribe();
+
+    const req = httpTestingController.expectOne(`${service['basePath']}/error`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.params.get('observe')).toBe(observe);
+    req.flush({}); // You can provide a response here
   });
 
-  it('should call onSelectOfDropdownOpenInNewTab with "claimsgroup" when onDropDownSubmit is called with the third option', () => {
-    const event = { currentValue: 'Find Additional Claims (via ID/Group ID)' };
-    component.onDropDownSubmit(event);
-    expect(component.onSelectOfDropdownOpenInNewTab).toHaveBeenCalledWith('claimsgroup');
+  it('should send a GET request to errorHtml endpoint', () => {
+    const observe = 'body';
+    service.errorHtmlUsingGET(observe).subscribe();
+
+    const req = httpTestingController.expectOne(`${service['basePath']}/error`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('observe')).toBe(observe);
+    req.flush({}); // You can provide a response here
   });
 
-  // Add more test cases as needed
+  // Similar test cases can be written for other HTTP methods like HEAD, OPTIONS, PATCH, POST, PUT.
 });
