@@ -1,52 +1,61 @@
 {
-  "users": [
-    {
-	  "name" : "Lucifer Morningstar",
-	  "age" : "30",
-	  "id":1,
-	  "dob" : "01-01-1991",
-      "first_name": "Lucifer",
-      "last_name": "Morningstar"
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "age": {"type": "number"}
     },
-    {
-	  "name" : "Damon Salvator",
-	  "age" : "30",
-	  "id":2,
-	  "dob" : "01-01-1991",
-      "first_name": "Damon",
-      "last_name": "Salvator"
-    },
-    {
-	  "name" : "Ragnar Lothbrok",
-	  "age" : "30",
-	  "id":3,
-	  "dob" : "01-01-1991",
-      "first_name": "Ragnar",
-      "last_name": "Lothbrok"
-    },
-    {
-	  "name" : "Johnathan Wick",
-	  "age" : "30",
-	  "id":4,
-	  "dob" : "01-01-1991",
-      "first_name": "Johnathan",
-      "last_name": "Wick"
-    },
-    {
-	  "name" : "Dexter Morgan",
-	  "age" : "30",
-	  "id":5,
-	  "dob" : "01-01-1991",
-      "first_name": "Dexter",
-      "last_name": "Morgan"
-	}
-	],
-	"more":[
-	{
-		"address_line1":"xxx",
-		"address_line2":"yyy",
-		"address_line3":"zzz",
-		"phone":""
-	}
-	  ]
+    "required": ["name", "age"]
 }
+
+
+
+............
+
+
+
+const fs = require('fs');
+
+// Read schema from file
+const schema = JSON.parse(fs.readFileSync('schema.json', 'utf8'));
+
+// Sample JSON data
+const jsonData = '{"name": "John Doe", "age": 30}';
+
+// Function to validate JSON data against schema
+function validateJson(jsonData, schema) {
+    try {
+        const data = JSON.parse(jsonData);
+        // Validate JSON data against schema
+        if (validate(data, schema)) {
+            console.log("JSON data is valid.");
+        } else {
+            console.error("JSON data is not valid.");
+        }
+    } catch (error) {
+        console.error("Invalid JSON data:", error.message);
+    }
+}
+
+// Function to validate JSON object against schema
+function validate(data, schema) {
+    // Implement JSON validation logic here
+    // Example: Check if all required fields are present
+    for (const field of schema.required) {
+        if (!(field in data)) {
+            console.error(`Missing required field: ${field}`);
+            return false;
+        }
+    }
+    // Example: Check data types
+    for (const [key, value] of Object.entries(data)) {
+        const expectedType = schema.properties[key].type;
+        if (typeof value !== expectedType) {
+            console.error(`Invalid data type for ${key}. Expected ${expectedType}, got ${typeof value}`);
+            return false;
+        }
+    }
+    return true;
+}
+
+// Validate JSON data
+validateJson(jsonData, schema);
