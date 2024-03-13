@@ -49,3 +49,33 @@ function validate(data, schema) {
 
 // Validate JSON data
 validateJson(jsonData, schema);
+
+
+....................................................
+
+
+
+import xml.etree.ElementTree as ET
+
+def is_json_like(xml_file):
+    try:
+        tree = ET.parse(xml_file)
+        root = tree.getroot()
+
+        # Check if the root has children (elements)
+        if len(root) > 0:
+            return False
+
+        # Check if the root text can be loaded as JSON
+        json.loads(root.text)
+        return True
+
+    except (ET.ParseError, ValueError):
+        return False
+
+# Example usage
+xml_file = "example.xml"
+if is_json_like(xml_file):
+    print("The XML file appears to be in JSON format.")
+else:
+    print("The XML file is not in JSON format.")
