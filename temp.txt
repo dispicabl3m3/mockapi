@@ -1,70 +1,38 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ServiceTabComponent } from './service-tab.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
-import { ModalService } from 'ui-commons'; // You may need to import other dependencies
-import { ClaimDataService } from '../../../claims-ui-claims-inquiry-services-module/src/projects';
-import { Constants } from '../../../claims-ui-claims-inquiry-services-module/src/projects'; // Import any required dependencies
+using System;
+using System.IO;
+using System.Text.Json;
 
-describe('ServiceTabComponent', () => {
-  let component: ServiceTabComponent;
-  let fixture: ComponentFixture<ServiceTabComponent>;
-  let mockClaimDataService: jasmine.SpyObj<ClaimDataService>;
-  let mockRouter: any;
-  let mockModalService: jasmine.SpyObj<ModalService>;
+class Program
+{
+    static bool IsJsonLike(string filePath)
+    {
+        try
+        {
+            // Read the file content
+            string content = File.ReadAllText(filePath);
 
-  beforeEach(() => {
-    mockClaimDataService = jasmine.createSpyObj('ClaimDataService', ['dispatchClaimsInquiry']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-    mockModalService = jasmine.createSpyObj('ModalService', ['openModal']);
+            // Attempt to deserialize the content
+            // If it fails, it's likely not in JSON format
+            JsonDocument.Parse(content);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
 
-    TestBed.configureTestingModule({
-      declarations: [ServiceTabComponent],
-      imports: [HttpClientTestingModule],
-      providers: [
-        { provide: ActivatedRoute, useValue: { snapshot: { parent: { paramMap: of({}) } } } },
-        { provide: Router, useValue: mockRouter },
-        { provide: ModalService, useValue: mockModalService },
-        { provide: ClaimDataService, useValue: mockClaimDataService },
-      ],
-    });
+    static void Main(string[] args)
+    {
+        string filePath = "example.xml"; // Replace with your file path
 
-    fixture = TestBed.createComponent(ServiceTabComponent);
-    component = fixture.componentInstance;
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('should handle successful claim inquiry', () => {
-    const mockClaimData = {}; // Provide sample data as needed
-    mockClaimDataService.dispatchClaimsInquiry.and.returnValue(of({ data: mockClaimData }));
-
-    fixture.detectChanges();
-
-    expect(component.isLoading).toBeFalse();
-    expect(component.serverError).toBeNull();
-    expect(component.servicesAndPaymentDetails).toEqual(mockClaimData);
-    // Add more expectations based on your component behavior
-  });
-
-  it('should handle error during claim inquiry', () => {
-    const mockError = 'Sample error message'; // Provide a sample error message
-    mockClaimDataService.dispatchClaimsInquiry.and.returnValue(throwError({ error: mockError }));
-
-    fixture.detectChanges();
-
-    expect(component.isLoading).toBeFalse();
-    expect(component.serverError).toEqual(mockError);
-    expect(mockModalService.openModal).toHaveBeenCalledWith(ServerErrorModalComponent, {
-      navigateTo: [],
-      error: mockError,
-      params: { relativeTo: jasmine.any(Object) }, // Add more specific expectations if needed
-    });
-    // Add more expectations based on your component behavior
-  });
-
-  // Add more test cases for other component methods and behaviors
-});
+        if (IsJsonLike(filePath))
+        {
+            Console.WriteLine("The file appears to be in JSON format.");
+        }
+        else
+        {
+            Console.WriteLine("The file is not in JSON format.");
+        }
+    }
+}
