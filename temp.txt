@@ -1,38 +1,19 @@
-using System;
-using System.IO;
-using System.Text.Json;
+const fs = require('fs');
 
-class Program
-{
-    static bool IsJsonLike(string filePath)
-    {
-        try
-        {
-            // Read the file content
-            string content = File.ReadAllText(filePath);
-
-            // Attempt to deserialize the content
-            // If it fails, it's likely not in JSON format
-            JsonDocument.Parse(content);
-            return true;
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
+function isJsonLike(filePath) {
+    try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        JSON.parse(content);
+        return true;
+    } catch (error) {
+        return false;
     }
+}
 
-    static void Main(string[] args)
-    {
-        string filePath = "example.xml"; // Replace with your file path
-
-        if (IsJsonLike(filePath))
-        {
-            Console.WriteLine("The file appears to be in JSON format.");
-        }
-        else
-        {
-            Console.WriteLine("The file is not in JSON format.");
-        }
-    }
+// Example usage
+const filePath = 'example.xml'; // Replace with the path to your file
+if (isJsonLike(filePath)) {
+    console.log('The file appears to be in JSON format.');
+} else {
+    console.log('The file is not in JSON format.');
 }
