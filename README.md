@@ -79,3 +79,11 @@ if is_json_like(xml_file):
     print("The XML file appears to be in JSON format.")
 else:
     print("The XML file is not in JSON format.")
+
+
+
+
+
+
+
+    https://teams.microsoft.com/l/meetup-join/19%3ameeting_OWNmN2FjMjYtZTRiMi00MmY2LTlkZTItMDNhMTM4NzE1MGZj%40thread.v2/0?context=%7b%22Tid%22%3a%222e0cb644-c094-41d7-ab3d-43201da24438%22%2c%22Oid%22%3a%22d1503e4d-ccd0-484f-b7af-8ba8f391afbd%22%7d
