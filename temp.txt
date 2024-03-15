@@ -17,3 +17,32 @@ if (isJsonLike(filePath)) {
 } else {
     console.log('The file is not in JSON format.');
 }
+
+.....................
+
+
+
+
+const fs = require('fs');
+
+function isJsonLike(filePath) {
+    try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        JSON.parse(content);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function checkFileFormat() {
+    const filePath = 'example.xml'; // Replace with the path to your file
+    if (isJsonLike(filePath)) {
+        console.log('The file appears to be in JSON format.');
+    } else {
+        console.log('The file is not in JSON format.');
+    }
+}
+
+// Call the function when the application starts
+checkFileFormat();
