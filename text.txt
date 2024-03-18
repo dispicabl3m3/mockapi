@@ -1,5 +1,12 @@
 /* styles.css */
 
+/* Reset default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 /* Center the button and result display area */
 body {
     display: flex;
@@ -7,7 +14,6 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    margin: 0;
 }
 
 /* Style the file input */
