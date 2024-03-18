@@ -1,0 +1,35 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const verifyButton = document.getElementById('verifyButton');
+    verifyButton.addEventListener('click', function() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const content = event.target.result;
+                if (isJsonLike(content)) {
+                    displayResult('The file appears to be in JSON format.');
+                } else {
+                    displayResult('The file is not in JSON format.');
+                }
+            };
+            reader.readAsText(file);
+        } else {
+            displayResult('Please select a file.');
+        }
+    });
+});
+
+function isJsonLike(content) {
+    try {
+        JSON.parse(content);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function displayResult(message) {
+    const resultDiv = document.getElementById('result');
+    resultDiv.textContent = message;
+}
