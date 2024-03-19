@@ -1,0 +1,11 @@
+Given that a user has successfully logged in to the Environment Uplift Portal, and is on the home page 
+
+WHEN the user has clicked on the MENU drop down
+
+THEN the user should be able to view  a list of Applications to select from as given in the mock up 
+
+The list should contain the following values 
+Access Channel
+Cotiviti
+Independent Dispute Resolution (IDR)
+Shared Accums - Inbound 
