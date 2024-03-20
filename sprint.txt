@@ -1,42 +1,41 @@
-#Build Tools
-BuildTool: NPM
+# Build Tools
+BuildTool: AngularCLI
 JavaVersion: Java 8
 VersionFilePath: ''
 
 # Code Signing
 SignCode:
-  ApplicationName: APP00236407_Prod
-  Label: APP00236407_Prod
+  ApplicationName: Your_New_Application_Name
+  Label: Your_New_Application_Label
   Includes:
     - .js
     - .css
 
-CompileScripts:
-  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/compile-script.sh && ./scripts/pipeline/compile-script.sh
+# Build Scripts
 BuildScripts:
-  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/build-script.sh && ./scripts/pipeline/build-script.sh develop develop web_app 3.22.0-SNAPSHOT
-  - ./node_modules/sonar-scanner/bin/sonar-scanner
-#Sonar Scan
+  - npm install
+  - npm run build
+
+# Sonar Scan
 SonarScan:
-    BuildFilePath: ''
+  BuildFilePath: ''
 
-#Push to UCD
+# Push to UCD
 PushToUCD: true
-ApplicationName: Keystone_Accums_UI
+ApplicationName: Your_New_UCD_Application_Name
 
-#Artifacts
+# Artifacts
 Artifacts:
-    #Artifact 1
-    - Artifact:
-        Component: BC2.0_Common_WiredUI
-        GroupID: com.hcsc.claimsui
-        ArtifactID: claimsui-application
-        VersionID: pom.xml
-        PackagingID: zip
-        ClassifierID: ''
+  - Artifact:
+      Component: Your_New_Component_Name
+      GroupID: your.new.group.id
+      ArtifactID: your-new-artifact-id
+      VersionID: package.json
+      PackagingID: zip
+      ClassifierID: ''
 
-#Deploy
+# Deploy
 DeployUCD:
   AutoDeploy: true
-  DevEnvironment: UIT1
-  DeployProcess: BC2.0_Common_WiredUI Deployment
+  DevEnvironment: Your_New_Dev_Environment
+  DeployProcess: Your_New_Deploy_Process_Name
