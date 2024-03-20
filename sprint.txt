@@ -1,25 +1,41 @@
-applications:
-  - name: claimswiredui
-    disk_quota: 1G
-    instances: 1
-    path: claimsui-app.zip
-    memory: 1G
-    buildpack: staticfile_buildpack
-    routes:
-      - route: wiredui-sit1.cfaa.azr.hcsctest.net
-      - route: wiredui-azr-sit1.test.fyiblue.com
-      - route: wiredui-azr-sit1.test.hcscint.net
-    env:
-      CLAIMS_MICROFRONTEND_URL: https://claimsui-microfrontend-sit1.cfaa.azr.hcsctest.net/main.js
-      ACCUMS_MICROFRONTEND_URL: https://accumsui-microfrontend-sit1.cfaa.azr.hcsctest.net/main.js
-      AUTH_URI: https://sso-auth-service-azr-sit1.test.fyiblue.com/v1
-      COMMON_SERVICE_URI: https://claims-ui-common-service-v1-sit1.cfaa.azr.hcsctest.net
-      DME_ENABLED: true
-      MEMBER_ENABLED: true
-      CLAIMS_ENABLED: true
-      ANALYTICS_ENABLED: true
-      ANALYTICS_URL: https://assets.adobedtm.com/45efbf285322/49f3c8f176a3/launch-a004a8cbcbbe-development.js
-      ENVIRONMENT: sit1
-      DT_TAGS: Keystone=ClaimsUI APPID=APP00236407 Portfolio=Keystone Portfolio=Claims AYS=No_Alerts
-      CLAIMS_ROLES: CLAIMS_NAV_PILOT
-      SPEEDLOADER_ENABLED: true
+#Build Tools
+BuildTool: maven-node
+JavaVersion: Java 8
+VersionFilePath: ''
+
+# Code Signing
+SignCode:
+  ApplicationName: APP00236407_Prod
+  Label: APP00236407_Prod
+  Includes:
+    - .js
+    - .css
+
+CompileScripts:
+  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/compile-script.sh && ./scripts/pipeline/compile-script.sh
+BuildScripts:
+  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/build-script.sh && ./scripts/pipeline/build-script.sh develop develop web_app 3.23.0-WIRED-SNAPSHOT
+  - npm run sonar-scanner
+ # - ./node_modules/sonar-scanner/bin/sonar-scanner -Dsonar.nodejs.executable=/usr/local/nvm/versions/node/v14.17.0/bin/node
+#Sonar Scan
+SonarScan:
+    BuildFilePath: ''
+    
+#Push to UCD
+PushToUCD: true
+ApplicationName: Keystone_Accums_UI    
+
+#Artifacts
+Artifacts:
+    #Artifact 1
+    - Artifact:
+        Component: BC2.0_Common_WiredUI
+        GroupID: com.hcsc.claimsui
+        ArtifactID: claimsui-application
+        VersionID: pom.xml
+        PackagingID: zip
+        ClassifierID: ''
+
+CI:
+  buildJobName: "BC_2.0_Accums_UI/job/BC2.0_Common_WiredUI/job/Build"
+  isMonoRepo: false
