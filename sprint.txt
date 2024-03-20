@@ -1,41 +1,38 @@
-#Build Tools
-BuildTool: maven-node
+# Build Tools
+BuildTool: angular-cli
 JavaVersion: Java 8
-VersionFilePath: ''
 
 # Code Signing
 SignCode:
-  ApplicationName: APP00236407_Prod
-  Label: APP00236407_Prod
+  ApplicationName: Your_Application_Name
+  Label: Your_Application_Label
   Includes:
     - .js
     - .css
 
-CompileScripts:
-  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/compile-script.sh && ./scripts/pipeline/compile-script.sh
+# Build Steps
 BuildScripts:
-  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/build-script.sh && ./scripts/pipeline/build-script.sh develop develop web_app 3.23.0-WIRED-SNAPSHOT
-  - npm run sonar-scanner
- # - ./node_modules/sonar-scanner/bin/sonar-scanner -Dsonar.nodejs.executable=/usr/local/nvm/versions/node/v14.17.0/bin/node
-#Sonar Scan
-SonarScan:
-    BuildFilePath: ''
-    
-#Push to UCD
-PushToUCD: true
-ApplicationName: Keystone_Accums_UI    
+  - npm install
+  - npm run build
 
-#Artifacts
+# Sonar Scan
+SonarScan:
+  BuildFilePath: ''
+
+# Push to UCD
+PushToUCD: true
+ApplicationName: Your_UCD_Application_Name
+
+# Artifacts
 Artifacts:
-    #Artifact 1
-    - Artifact:
-        Component: BC2.0_Common_WiredUI
-        GroupID: com.hcsc.claimsui
-        ArtifactID: claimsui-application
-        VersionID: pom.xml
-        PackagingID: zip
-        ClassifierID: ''
+  - Artifact:
+      Component: Your_Component_Name
+      GroupID: your.group.id
+      ArtifactID: your-artifact-id
+      VersionID: package.json
+      PackagingID: zip
+      ClassifierID: ''
 
 CI:
-  buildJobName: "BC_2.0_Accums_UI/job/BC2.0_Common_WiredUI/job/Build"
+  buildJobName: "Your_Build_Job_Name"
   isMonoRepo: false
