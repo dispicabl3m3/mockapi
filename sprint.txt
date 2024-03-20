@@ -1,38 +1,42 @@
-# Build Tools
-BuildTool: angular-cli
+#Build Tools
+BuildTool: NPM
 JavaVersion: Java 8
+VersionFilePath: ''
 
 # Code Signing
 SignCode:
-  ApplicationName: Your_Application_Name
-  Label: Your_Application_Label
+  ApplicationName: APP00236407_Prod
+  Label: APP00236407_Prod
   Includes:
     - .js
     - .css
 
-# Build Steps
+CompileScripts:
+  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/compile-script.sh && ./scripts/pipeline/compile-script.sh
 BuildScripts:
-  - npm install
-  - npm run build
-
-# Sonar Scan
+  - mvn compile -f pomd.xml && chmod +x scripts/pipeline/build-script.sh && ./scripts/pipeline/build-script.sh develop develop web_app 3.22.0-SNAPSHOT
+  - ./node_modules/sonar-scanner/bin/sonar-scanner
+#Sonar Scan
 SonarScan:
-  BuildFilePath: ''
+    BuildFilePath: ''
 
-# Push to UCD
+#Push to UCD
 PushToUCD: true
-ApplicationName: Your_UCD_Application_Name
+ApplicationName: Keystone_Accums_UI
 
-# Artifacts
+#Artifacts
 Artifacts:
-  - Artifact:
-      Component: Your_Component_Name
-      GroupID: your.group.id
-      ArtifactID: your-artifact-id
-      VersionID: package.json
-      PackagingID: zip
-      ClassifierID: ''
+    #Artifact 1
+    - Artifact:
+        Component: BC2.0_Common_WiredUI
+        GroupID: com.hcsc.claimsui
+        ArtifactID: claimsui-application
+        VersionID: pom.xml
+        PackagingID: zip
+        ClassifierID: ''
 
-CI:
-  buildJobName: "Your_Build_Job_Name"
-  isMonoRepo: false
+#Deploy
+DeployUCD:
+  AutoDeploy: true
+  DevEnvironment: UIT1
+  DeployProcess: BC2.0_Common_WiredUI Deployment
