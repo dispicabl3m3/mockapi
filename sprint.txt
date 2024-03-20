@@ -1,12 +1,25 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module'; // Import your main AppModule
-
-// Enable production mode
-if (process.env.NODE_ENV === 'production') {
-  enableProdMode();
-}
-
-// Bootstrap the main AppModule
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+applications:
+  - name: claimswiredui
+    disk_quota: 1G
+    instances: 1
+    path: claimsui-app.zip
+    memory: 1G
+    buildpack: staticfile_buildpack
+    routes:
+      - route: wiredui-sit1.cfaa.azr.hcsctest.net
+      - route: wiredui-azr-sit1.test.fyiblue.com
+      - route: wiredui-azr-sit1.test.hcscint.net
+    env:
+      CLAIMS_MICROFRONTEND_URL: https://claimsui-microfrontend-sit1.cfaa.azr.hcsctest.net/main.js
+      ACCUMS_MICROFRONTEND_URL: https://accumsui-microfrontend-sit1.cfaa.azr.hcsctest.net/main.js
+      AUTH_URI: https://sso-auth-service-azr-sit1.test.fyiblue.com/v1
+      COMMON_SERVICE_URI: https://claims-ui-common-service-v1-sit1.cfaa.azr.hcsctest.net
+      DME_ENABLED: true
+      MEMBER_ENABLED: true
+      CLAIMS_ENABLED: true
+      ANALYTICS_ENABLED: true
+      ANALYTICS_URL: https://assets.adobedtm.com/45efbf285322/49f3c8f176a3/launch-a004a8cbcbbe-development.js
+      ENVIRONMENT: sit1
+      DT_TAGS: Keystone=ClaimsUI APPID=APP00236407 Portfolio=Keystone Portfolio=Claims AYS=No_Alerts
+      CLAIMS_ROLES: CLAIMS_NAV_PILOT
+      SPEEDLOADER_ENABLED: true
