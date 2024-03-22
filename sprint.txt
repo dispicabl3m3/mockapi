@@ -1,41 +1,26 @@
-# Build Tools
-BuildTool: AngularCLI
-JavaVersion: Java 8
-VersionFilePath: ''
+user nginx;
+worker_processes auto;
 
-# Code Signing
-SignCode:
-  ApplicationName: Your_New_Application_Name
-  Label: Your_New_Application_Label
-  Includes:
-    - .js
-    - .css
+events {
+    worker_connections 1024;
+}
 
-# Build Scripts
-BuildScripts:
-  - npm install
-  - npm run build
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
 
-# Sonar Scan
-SonarScan:
-  BuildFilePath: ''
+    server {
+        listen       80;
+        server_name  example.com;
 
-# Push to UCD
-PushToUCD: true
-ApplicationName: Your_New_UCD_Application_Name
+        location / {
+            root   /var/www/html;
+            index  index.html index.htm;
+        }
 
-# Artifacts
-Artifacts:
-  - Artifact:
-      Component: Your_New_Component_Name
-      GroupID: your.new.group.id
-      ArtifactID: your-new-artifact-id
-      VersionID: package.json
-      PackagingID: zip
-      ClassifierID: ''
-
-# Deploy
-DeployUCD:
-  AutoDeploy: true
-  DevEnvironment: Your_New_Dev_Environment
-  DeployProcess: Your_New_Deploy_Process_Name
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+}
