@@ -1,58 +1,37 @@
-user nginx;
-worker_processes auto;
+import { enableProdMode } from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-error_log <%= ENV["APP_ROOT"] %>/nginx/logs/error.log;
-events {
-    worker_connections 1024;
+import { AppModule } from './app/app.module';
+import { environment } from './environments/environment';
+
+async function start() {
+  fetch('/environment', { credentials: 'include' })
+    .then(response => response.json())
+    .then(config => {
+      var window: any = Window;
+      window['SERVICE_URL'] = config['SERVICE_URL'];
+      window['ANALYTICS_URL'] = config['ANALYTICS_URL'];
+      window['ENABLE_SSO'] = config['ENABLE_SSO'];
+      window['SSO_API_URL'] = config['SSO_API_URL'];
+      window['ECE_URL'] = config['ECE_URL'];
+      window['ECE_LOGS_INDEX_ID'] = config['ECE_LOGS_INDEX_ID'];
+      window['ECE_DASHBOARD_INDEX_ID'] = config['ECE_DASHBOARD_INDEX_ID'];
+      window['DYNATRACE_URL'] = config['DYNATRACE_URL'];
+      window['ENVIRONMENTS'] = config['ENVIRONMENTS'];
+      window['DEFAULT_ENVIRONMENT'] = config['DEFAULT_ENVIRONMENT'];
+      window['CONSUMER_LIST'] = config['CONSUMER_LIST'];
+      window['ENABLE_ANALYTICS'] = config['ENABLE_ANALYTICS'];
+      window['ENABLE_REPROCESS'] = config['ENABLE_REPROCESS'];
+      platformBrowserDynamic().bootstrapModule(AppModule)
+        .catch(err => console.error(err));
+    });
 }
 
-http {
-    log_format cloudfoundry '$http_x_forwarded_for - $http_referer - [$time_local] "$request" $status $body_bytes_sent';
-    access_log <%= ENV["APP_ROOT"] %>/nginx/logs/access.log cloudfoundry;
-    default_type application/octet-stream;
-    include mime.types;
-    sendfile on;
-    gzip on;
-    tcp_nopush on;
-    keepalive_timeout 30;
-
-    server {
-        listen <%= ENV["PORT"] %>;
-        server_name localhost;
-        root <%= ENV["APP_ROOT"] %>/public;
-
-        location /json {
-            rewrite ^/json/(.*)$ /assets/$1 break;
-        }
-
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-
-        location ~* \.(html)$ {
-            add_header Cache-Control "max-age=0, no-cache, must-revalidate";
-        }
-
-        location = /environment {
-            set $SERVICE_URL <%= ENV["SERVICE_URL"] %>;
-            set $ENABLE_SSO <%= ENV["ENABLE_SSO"] %>;
-            add_header Content-Type application/json;
-            return 200 '{ "SERVICE_URL" : "$SERVICE_URL", "ENABLE_SSO" : "$ENABLE_SSO"}';
-        }
-    }
-
-    server {
-        listen       80;
-        server_name  example.com;
-
-        location / {
-            root   /var/www/html;
-            index  index.html index.htm;
-        }
-
-        error_page   500 502 503 504  /50x.html;
-        location = /50x.html {
-            root   /usr/share/nginx/html;
-        }
-    }
+if (environment.production) {
+  enableProdMode();
+  start();
+} else {
+  platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch(err => console.error('Error during bootstrap:', err));
 }
