@@ -1,32 +1,28 @@
 export const environment = {
-  API: "https://your-prod-api-url.com", // Replace with your production API URL
   production: true,
-  API_URL: "https://your-prod-api-url.com", // Replace with your production API URL
-  ENVIRONMENTS: "PROD", // Update environments as per your project
-  DEFAULT_ENVIRONMENT: "PROD", // Update default environment as per your project
-  withCredentials: false, // Set to true if you need to send credentials with requests
-
-  // Error code product names separated by commas
-  ERROR_CODE_PRODUCT_NAMES: "Product1,Product2,Product3",
-
+  API_URL: "",
+  analyticsUrl : "",
+  DYNATRACE_URL: "",
+  ENVIRONMENTS: "",
+  DEFAULT_ENVIRONMENT: "",
+  CONSUMER_LIST: "",
+  ENABLE_ANALYTICS: "false",
+  ENABLE_REPROCESS: "false",
+  withCredentials:true,
   /** SSO configuration start*/
   SSO_CONFIG: {
-    enableSSO: true, // Set to true if you are using Single Sign-On
+    enableSSO: true, // default is false
     enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
-    authSmSesssionApiUri: "https://your-prod-sso-session-api-url.com", // Replace with your production SSO session API URL
-    clientid: "your-prod-client-id", // Replace with your production client ID
-
-    activityThresholdInSec: 300, // Adjust as needed
-
-    authErrorText: "Authorization failed", // Error message for authorization failure
-    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
-
-    handleSSOErrors: false, // Set to true if you want to handle SSO errors
-
-    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
-    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
-    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
-    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
-    scope: "openid permissions profile" // Set the required scope for your application
-  },
+    clientid: "ee9bafab565c479b99073c6da7e36e62",
+    authSmSesssionApiUri: '',
+    // In general - JWT Expiry is ~3650seconds i.e. ~ 1hr
+    activityThresholdInSec: 300, // default value : 300 second
+    authErrorText: 'Authorization failed',
+    authTokenExpiryErrorText: 'Session expired, please try logging in again',
+    handleSSOErrors: false, // default value : true
+    defaultAuthorizationAPIErrorHandling: true, // default value : true
+    defaultSessionTimeoutErrorHandling: false,
+    defaultAuthorizationErrorHandling: false,
+    authorizationAPIErrorCodes: [401, 403] // default value : [401]
+  }
 };
