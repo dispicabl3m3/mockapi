@@ -1,37 +1,37 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { AppModule } from './app/app.module'; // Import your main AppModule
 
-import { AppModule } from './app/app.module';
-import { environment } from './environments/environment';
-
-async function start() {
-  fetch('/environment', { credentials: 'include' })
-    .then(response => response.json())
-    .then(config => {
-      var window: any = Window;
-      window['SERVICE_URL'] = config['SERVICE_URL'];
-      window['ANALYTICS_URL'] = config['ANALYTICS_URL'];
-      window['ENABLE_SSO'] = config['ENABLE_SSO'];
-      window['SSO_API_URL'] = config['SSO_API_URL'];
-      window['ECE_URL'] = config['ECE_URL'];
-      window['ECE_LOGS_INDEX_ID'] = config['ECE_LOGS_INDEX_ID'];
-      window['ECE_DASHBOARD_INDEX_ID'] = config['ECE_DASHBOARD_INDEX_ID'];
-      window['DYNATRACE_URL'] = config['DYNATRACE_URL'];
-      window['ENVIRONMENTS'] = config['ENVIRONMENTS'];
-      window['DEFAULT_ENVIRONMENT'] = config['DEFAULT_ENVIRONMENT'];
-      window['CONSUMER_LIST'] = config['CONSUMER_LIST'];
-      window['ENABLE_ANALYTICS'] = config['ENABLE_ANALYTICS'];
-      window['ENABLE_REPROCESS'] = config['ENABLE_REPROCESS'];
-      platformBrowserDynamic().bootstrapModule(AppModule)
-        .catch(err => console.error(err));
-    });
-}
-
-if (environment.production) {
+// Enable production mode if NODE_ENV is set to 'production'
+if (process.env.NODE_ENV === 'production') {
   enableProdMode();
-  start();
-} else {
-  platformBrowserDynamic()
-    .bootstrapModule(AppModule)
-    .catch(err => console.error('Error during bootstrap:', err));
 }
+
+// Start function to fetch environment configuration asynchronously
+async function start() {
+  try {
+    const response = await fetch('/environment', { credentials: 'include' });
+    const config = await response.json();
+    const window: any = Window; // Define window as any type to avoid TypeScript errors
+    window['SERVICE_URL'] = config['SERVICE_URL'];
+    window['ANALYTICS_URL'] = config['ANALYTICS_URL'];
+    window['ENABLE_SSO'] = config['ENABLE_SSO'];
+    window['SSO_API_URL'] = config['SSO_API_URL'];
+    window['ECE_URL'] = config['ECE_URL'];
+    window['ECE_LOGS_INDEX_ID'] = config['ECE_LOGS_INDEX_ID'];
+    window['ECE_DASHBOARD_INDEX_ID'] = config['ECE_DASHBOARD_INDEX_ID'];
+    window['DYNATRACE_URL'] = config['DYNATRACE_URL'];
+    window['ENVIRONMENTS'] = config['ENVIRONMENTS'];
+    window['DEFAULT_ENVIRONMENT'] = config['DEFAULT_ENVIRONMENT'];
+    window['CONSUMER_LIST'] = config['CONSUMER_LIST'];
+    window['ENABLE_ANALYTICS'] = config['ENABLE_ANALYTICS'];
+    window['ENABLE_REPROCESS'] = config['ENABLE_REPROCESS'];
+    // Bootstrap the main AppModule once configuration is fetched
+    platformBrowserDynamic().bootstrapModule(AppModule);
+  } catch (err) {
+    console.error('Error during bootstrap:', err);
+  }
+}
+
+// Start the application
+start();
