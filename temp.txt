@@ -1,13 +1,9 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
-
 export const environment = {
-  API: "https://your-api-url.com", // Replace with your API URL
-  production: false,
-  API_URL: "https://your-api-url.com", // Replace with your API URL
-  ENVIRONMENTS: "DEV,TEST", // Update environments as per your project
-  DEFAULT_ENVIRONMENT: "DEV", // Update default environment as per your project
+  API: "https://your-prod-api-url.com", // Replace with your production API URL
+  production: true,
+  API_URL: "https://your-prod-api-url.com", // Replace with your production API URL
+  ENVIRONMENTS: "PROD", // Update environments as per your project
+  DEFAULT_ENVIRONMENT: "PROD", // Update default environment as per your project
   withCredentials: false, // Set to true if you need to send credentials with requests
 
   // Error code product names separated by commas
@@ -17,8 +13,8 @@ export const environment = {
   SSO_CONFIG: {
     enableSSO: true, // Set to true if you are using Single Sign-On
     enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
-    authSmSesssionApiUri: "https://your-sso-session-api-url.com", // Replace with your SSO session API URL
-    clientid: "your-client-id", // Replace with your client ID
+    authSmSesssionApiUri: "https://your-prod-sso-session-api-url.com", // Replace with your production SSO session API URL
+    clientid: "your-prod-client-id", // Replace with your production client ID
 
     activityThresholdInSec: 300, // Adjust as needed
 
