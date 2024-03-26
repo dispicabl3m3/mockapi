@@ -1,48 +1,53 @@
-const fs = require('fs');
+worker_processes 1;
+daemon off;
 
-function isJsonLike(filePath) {
-    try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        JSON.parse(content);
-        return true;
-    } catch (error) {
-        return false;
+error_log <%= ENV["APP_ROOT"] %>/nginx/logs/error.log;
+events { worker_connections 1024; }
+
+http {
+  log_format cloudfoundry '$http_x_forwarded_for - $http_referer - [$time_local] "$request" $status $body_bytes_sent';
+  access_log <%= ENV["APP_ROOT"] %>/nginx/logs/access.log cloudfoundry;
+  default_type application/octet-stream;
+  include mime.types;
+  sendfile on;
+  gzip on;
+  tcp_nopush on;
+  keepalive_timeout 30;
+
+  server {
+    listen <%= ENV["PORT"] %>;
+    server_name localhost;
+    root <%= ENV["APP_ROOT"] %>/public;
+
+    location /json {
+      rewrite ^/json/(.*)$ /assets/$1 break;
     }
-}
 
-// Example usage
-const filePath = 'example.xml'; // Replace with the path to your file
-if (isJsonLike(filePath)) {
-    console.log('The file appears to be in JSON format.');
-} else {
-    console.log('The file is not in JSON format.');
-}
-
-.....................
-
-
-
-
-const fs = require('fs');
-
-function isJsonLike(filePath) {
-    try {
-        const content = fs.readFileSync(filePath, 'utf8');
-        JSON.parse(content);
-        return true;
-    } catch (error) {
-        return false;
+    location / {
+      try_files $uri $uri/ /index.html;
     }
-}
 
-function checkFileFormat() {
-    const filePath = 'example.xml'; // Replace with the path to your file
-    if (isJsonLike(filePath)) {
-        console.log('The file appears to be in JSON format.');
-    } else {
-        console.log('The file is not in JSON format.');
+    location ~* \.(html)$ {
+      add_header Cache-Control "max-age=0, no-cache, must-revalidate";
     }
-}
 
-// Call the function when the application starts
-checkFileFormat();
+    location = /environment {
+      set $SERVICE_URL <%= ENV["SERVICE_URL"] %>;
+      # set $ANALYTICS_URL <%= ENV["ANALYTICS_URL"] %>;
+      set $ENABLE_SSO <%= ENV["ENABLE_SSO"] %>;
+      # set $SSO_API_URL <%= ENV["SSO_API_URL"] %>;
+      # set $ECE_URL <%= ENV["ECE_URL"] %>;
+      # set $ECE_LOGS_INDEX_ID <%= ENV["ECE_LOGS_INDEX_ID"] %>;
+      # set $ECE_DASHBOARD_INDEX_ID <%= ENV["ECE_DASHBOARD_INDEX_ID"] %>;
+      # set $DYNATRACE_URL <%= ENV["DYNATRACE_URL"] %>;
+      # set $ENVIRONMENTS <%= ENV["ENVIRONMENTS"] %>;
+      # set $DEFAULT_ENVIRONMENT <%= ENV["DEFAULT_ENVIRONMENT"] %>;
+      # set $CONSUMER_LIST <%= ENV["CONSUMER_LIST"] %>;
+      # set $ENABLE_ANALYTICS <%= ENV["ENABLE_ANALYTICS"] %>;
+      # set $ENABLE_REPROCESS <%= ENV["ENABLE_REPROCESS"] %>;
+      add_header Content-Type application/json;
+      # return 200 '{ "SERVICE_URL" : "$SERVICE_URL", "ANALYTICS_URL" : "$ANALYTICS_URL", "ENABLE_SSO" : "$ENABLE_SSO", "SSO_API_URL" : "$SSO_API_URL", "ECE_URL" : "$ECE_URL", "DYNATRACE_URL" : "$DYNATRACE_URL", "ENVIRONMENTS" : "$ENVIRONMENTS", "DEFAULT_ENVIRONMENT" : "$DEFAULT_ENVIRONMENT", "CONSUMER_LIST" : "$CONSUMER_LIST", "ENABLE_ANALYTICS" : "$ENABLE_ANALYTICS", "ECE_LOGS_INDEX_ID" : "$ECE_LOGS_INDEX_ID", "ECE_DASHBOARD_INDEX_ID" : "$ECE_DASHBOARD_INDEX_ID", "ENABLE_REPROCESS" : "$ENABLE_REPROCESS"}';
+      return 200 '{ "SERVICE_URL" : "$SERVICE_URL", "ENABLE_SSO" : "$ENABLE_SSO"}';
+    }
+  }
+}
