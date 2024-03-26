@@ -1,37 +1,42 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module'; // Import your main AppModule
+// This file can be replaced during build by using the `fileReplacements` array.
+// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
+// The list of file replacements can be found in `angular.json`.
 
-// Enable production mode if NODE_ENV is set to 'production'
-if (process.env.NODE_ENV === 'production') {
-  enableProdMode();
-}
+export const environment = {
+  API: "https://bt-api-uit2.cfaa.azr.hcsctest.net/btm-api",
+  production: false,
+  API_URL: "https://bt-api-uit2.cfaa.azr.hcsctest.net/btm-api",
+  ENVIRONMENTS: "UIT2,UAT2",
+  DEFAULT_ENVIRONMENT: "UIT2",
+  withCredentials:false,
+  ERROR_CODE_PRODUCT_NAMES: "CDP,DupCheck,BD,Medicare,Pricing,Accums,BDM,Framework,COB Banking,Mulesoft",
+  /** SSO configuration start*/
+  SSO_CONFIG: {
+    enableSSO: true,
+    enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
+    authSmSesssionApiUri: "https://bt-ui-uit2.test.fyiblue.com/btm-api/v1/getJwt",
+    // authSmSesssionApiUri: "https://sso-auth-service-azr-uit2.test.fyiblue.com/v1/authorization?app-name=dmeaccums",
+    // authRefreshApiUri: "https://bt-api-uit2.test.fyiblue.com/sso/v1/getJwt",
+    clientid: "ee9bafab565c479b99073c6da7e36e62",
 
-// Start function to fetch environment configuration asynchronously
-async function start() {
-  try {
-    const response = await fetch('/environment', { credentials: 'include' });
-    const config = await response.json();
-    const window: any = Window; // Define window as any type to avoid TypeScript errors
-    window['SERVICE_URL'] = config['SERVICE_URL'];
-    window['ANALYTICS_URL'] = config['ANALYTICS_URL'];
-    window['ENABLE_SSO'] = config['ENABLE_SSO'];
-    window['SSO_API_URL'] = config['SSO_API_URL'];
-    window['ECE_URL'] = config['ECE_URL'];
-    window['ECE_LOGS_INDEX_ID'] = config['ECE_LOGS_INDEX_ID'];
-    window['ECE_DASHBOARD_INDEX_ID'] = config['ECE_DASHBOARD_INDEX_ID'];
-    window['DYNATRACE_URL'] = config['DYNATRACE_URL'];
-    window['ENVIRONMENTS'] = config['ENVIRONMENTS'];
-    window['DEFAULT_ENVIRONMENT'] = config['DEFAULT_ENVIRONMENT'];
-    window['CONSUMER_LIST'] = config['CONSUMER_LIST'];
-    window['ENABLE_ANALYTICS'] = config['ENABLE_ANALYTICS'];
-    window['ENABLE_REPROCESS'] = config['ENABLE_REPROCESS'];
-    // Bootstrap the main AppModule once configuration is fetched
-    platformBrowserDynamic().bootstrapModule(AppModule);
-  } catch (err) {
-    console.error('Error during bootstrap:', err);
-  }
-}
+    activityThresholdInSec: 300,
 
-// Start the application
-start();
+    authErrorText: "Authorization failed",
+    authTokenExpiryErrorText: "Session expired, please try logging in again",
+    handleSSOErrors: false, // default value : true
+
+    defaultAuthorizationAPIErrorHandling: true,
+    defaultSessionTimeoutErrorHandling: false,
+    defaultAuthorizationErrorHandling: false,
+    authorizationAPIErrorCodes: [401, 403],
+    scope: "openid permissions profile"
+  },
+};
+/*
+ * For easier debugging in development mode, you can import the following file
+ * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
+ *
+ * This import should be commented out in production mode because it will have a negative impact
+ * on performance if an error is thrown.
+ */
+// import 'zone.js/dist/zone-error';  // Included with Angular CLI.
