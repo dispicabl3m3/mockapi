@@ -3,40 +3,34 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  API: "https://bt-api-uit2.cfaa.azr.hcsctest.net/btm-api",
+  API: "https://your-api-url.com", // Replace with your API URL
   production: false,
-  API_URL: "https://bt-api-uit2.cfaa.azr.hcsctest.net/btm-api",
-  ENVIRONMENTS: "UIT2,UAT2",
-  DEFAULT_ENVIRONMENT: "UIT2",
-  withCredentials:false,
-  ERROR_CODE_PRODUCT_NAMES: "CDP,DupCheck,BD,Medicare,Pricing,Accums,BDM,Framework,COB Banking,Mulesoft",
+  API_URL: "https://your-api-url.com", // Replace with your API URL
+  ENVIRONMENTS: "DEV,TEST", // Update environments as per your project
+  DEFAULT_ENVIRONMENT: "DEV", // Update default environment as per your project
+  withCredentials: false, // Set to true if you need to send credentials with requests
+
+  // Error code product names separated by commas
+  ERROR_CODE_PRODUCT_NAMES: "Product1,Product2,Product3",
+
   /** SSO configuration start*/
   SSO_CONFIG: {
-    enableSSO: true,
+    enableSSO: true, // Set to true if you are using Single Sign-On
     enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
-    authSmSesssionApiUri: "https://bt-ui-uit2.test.fyiblue.com/btm-api/v1/getJwt",
-    // authSmSesssionApiUri: "https://sso-auth-service-azr-uit2.test.fyiblue.com/v1/authorization?app-name=dmeaccums",
-    // authRefreshApiUri: "https://bt-api-uit2.test.fyiblue.com/sso/v1/getJwt",
-    clientid: "ee9bafab565c479b99073c6da7e36e62",
+    authSmSesssionApiUri: "https://your-sso-session-api-url.com", // Replace with your SSO session API URL
+    clientid: "your-client-id", // Replace with your client ID
 
-    activityThresholdInSec: 300,
+    activityThresholdInSec: 300, // Adjust as needed
 
-    authErrorText: "Authorization failed",
-    authTokenExpiryErrorText: "Session expired, please try logging in again",
-    handleSSOErrors: false, // default value : true
+    authErrorText: "Authorization failed", // Error message for authorization failure
+    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
 
-    defaultAuthorizationAPIErrorHandling: true,
-    defaultSessionTimeoutErrorHandling: false,
-    defaultAuthorizationErrorHandling: false,
-    authorizationAPIErrorCodes: [401, 403],
-    scope: "openid permissions profile"
+    handleSSOErrors: false, // Set to true if you want to handle SSO errors
+
+    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
+    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
+    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
+    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
+    scope: "openid permissions profile" // Set the required scope for your application
   },
 };
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/dist/zone-error';  // Included with Angular CLI.
