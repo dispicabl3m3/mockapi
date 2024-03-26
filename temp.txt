@@ -1,28 +1,33 @@
 export const environment = {
   production: true,
-  API_URL: "",
-  analyticsUrl : "",
-  DYNATRACE_URL: "",
-  ENVIRONMENTS: "",
-  DEFAULT_ENVIRONMENT: "",
-  CONSUMER_LIST: "",
-  ENABLE_ANALYTICS: "false",
-  ENABLE_REPROCESS: "false",
-  withCredentials:true,
-  /** SSO configuration start*/
+  API_URL: "https://your-production-api-url.com", // Replace with your production API URL
+  analyticsUrl: "", // Add your analytics URL if applicable
+  DYNATRACE_URL: "", // Add your Dynatrace URL if applicable
+  ENVIRONMENTS: "", // Update environments as needed
+  DEFAULT_ENVIRONMENT: "", // Update default environment as needed
+  CONSUMER_LIST: "", // Add your consumer list if applicable
+  ENABLE_ANALYTICS: "false", // Set to true if analytics is enabled
+  ENABLE_REPROCESS: "false", // Set to true if reprocessing is enabled
+  withCredentials: true, // Set to true if you need to send credentials with requests
+
+  /** SSO configuration start */
   SSO_CONFIG: {
-    enableSSO: true, // default is false
-    enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
-    clientid: "ee9bafab565c479b99073c6da7e36e62",
-    authSmSesssionApiUri: '',
+    enableSSO: true, // Set to true if you are using Single Sign-On
+    enableAuthHeader: true, // Enable to send <Bearer: token> header with request
+    clientid: "your-client-id", // Replace with your client ID
+    authSmSesssionApiUri: "", // Add your SSO session API URI if applicable
+
     // In general - JWT Expiry is ~3650seconds i.e. ~ 1hr
-    activityThresholdInSec: 300, // default value : 300 second
-    authErrorText: 'Authorization failed',
-    authTokenExpiryErrorText: 'Session expired, please try logging in again',
-    handleSSOErrors: false, // default value : true
-    defaultAuthorizationAPIErrorHandling: true, // default value : true
-    defaultSessionTimeoutErrorHandling: false,
-    defaultAuthorizationErrorHandling: false,
-    authorizationAPIErrorCodes: [401, 403] // default value : [401]
-  }
+    activityThresholdInSec: 300, // Adjust as needed
+
+    authErrorText: "Authorization failed", // Error message for authorization failure
+    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
+
+    handleSSOErrors: false, // Set to true if you want to handle SSO errors
+
+    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
+    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
+    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
+    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
+  },
 };
