@@ -1,33 +1,41 @@
-export const environment = {
-  production: true,
-  API_URL: "https://your-production-api-url.com", // Replace with your production API URL
-  analyticsUrl: "", // Add your analytics URL if applicable
-  DYNATRACE_URL: "", // Add your Dynatrace URL if applicable
-  ENVIRONMENTS: "", // Update environments as needed
-  DEFAULT_ENVIRONMENT: "", // Update default environment as needed
-  CONSUMER_LIST: "", // Add your consumer list if applicable
-  ENABLE_ANALYTICS: "false", // Set to true if analytics is enabled
-  ENABLE_REPROCESS: "false", // Set to true if reprocessing is enabled
-  withCredentials: true, // Set to true if you need to send credentials with requests
+#Build Tools
+BuildTool: MAVEN
+# JavaVersion: Java 17
+JavaVersion: Java 8
+VersionFilePath: ''
 
-  /** SSO configuration start */
-  SSO_CONFIG: {
-    enableSSO: true, // Set to true if you are using Single Sign-On
-    enableAuthHeader: true, // Enable to send <Bearer: token> header with request
-    clientid: "your-client-id", // Replace with your client ID
-    authSmSesssionApiUri: "", // Add your SSO session API URI if applicable
+#Compile Test
+CompileScripts:
 
-    // In general - JWT Expiry is ~3650seconds i.e. ~ 1hr
-    activityThresholdInSec: 300, // Adjust as needed
+  - mvn clean compile -f pom.xml -Djarsigner.skip=true
 
-    authErrorText: "Authorization failed", // Error message for authorization failure
-    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
 
-    handleSSOErrors: false, // Set to true if you want to handle SSO errors
+#Build
+BuildScripts:
+    - mvn clean deploy -f pom.xml -Djarsigner.skip=false
+    - mvn sonar:sonar -f pom.xml
+#SignCode: 
+SignCode:
+  ApplicationName: APP00046917_Prod
+  Label: APP00046917_Prod 
 
-    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
-    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
-    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
-    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
-  },
-};
+  #UCD
+PushToUCD: true
+ApplicationName: Env-Uplift-UI
+
+#Artifacts
+Artifacts:
+    #Artifact
+    - Artifact:
+        Component: Env-Uplift-UI
+        GroupID: com.hcsc.envUplift
+        ArtifactID: env-uplift-ui
+        VersionID: 2024.03-SNAPSHOT
+        PackagingID: jar
+        ClassifierID: ''
+
+#AutoDeploy to Dev
+DeployUCD:
+  AutoDeploy: true
+  DevEnvironment: UIT1
+  DeployProcess: Env-Uplift-UI Deployment
