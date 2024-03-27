@@ -1,14 +1,14 @@
 export class Constants {
-  public static DEV_UI_URL: string = 'bt-ui-uit2.cfaa.azr.hcsctest.net';
-  public static DEV_UI_FR_URL: string = 'bt-ui-uit2.test.fyiblue.com';
-  public static UAT_UI_URL: string = 'bt-ui-uat2.cfaa.azr.hcsctest.net';
-  public static UAT_UI_FR_URL: string = 'bt-ui-uat2.test.fyiblue.com';
+  public static DEV_UI_URL: string = 'envuplift-ui-uit1.cfaa.azr.hcsctest.net';
+  public static DEV_UI_FR_URL: string = 'envuplift-ui-uit1.test.fyiblue.com';
+  public static UAT_UI_URL: string = 'envuplift-ui-uat1.cfaa.azr.hcsctest.net';
+  public static UAT_UI_FR_URL: string = 'envuplift-ui-uat1.test.fyiblue.com';
 
   public static SERVICE_URL: any = {
-    'bt-ui-uit2.cfaa.azr.hcsctest.net': 'bt-api-uit2.cfaa.azr.hcsctest.net',
-    'bt-ui-uit2.test.fyiblue.com':    'bt-api-uit2.test.fyiblue.com',
-    'bt-ui-uat2.cfaa.azr.hcsctest.net': 'bt-api-uat2.cfaa.azr.hcsctest.net',
-    'bt-ui-uat2.test.fyiblue.com':    'bt-api-uat2.test.fyiblue.com',
+    'envuplift-ui-uit1.cfaa.azr.hcsctest.net': 'envuplift-api-uit1.cfaa.azr.hcsctest.net',
+    'envuplift-ui-uit1.test.fyiblue.com':    'envuplift-api-uit1.test.fyiblue.com',
+    'envuplift-ui-uat1.cfaa.azr.hcsctest.net': 'envuplift-api-uat1.cfaa.azr.hcsctest.net',
+    'envuplift-ui-uat1.test.fyiblue.com':    'envuplift-api-uat1.test.fyiblue.com',
   };
 
   public static alphaChk = /^[a-zA-Z]*$/;
