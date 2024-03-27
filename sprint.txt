@@ -3,11 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  API: "https://your-api-url.com", // Replace with your API URL
+  API: "https://envuplift-api-sit1.cfaa.azr.hcsctest.net", // Update with your API URL
   production: false,
-  API_URL: "https://your-api-url.com", // Replace with your API URL
-  ENVIRONMENTS: "DEV,TEST", // Update environments as per your project
-  DEFAULT_ENVIRONMENT: "DEV", // Update default environment as per your project
+  API_URL: "https://envuplift-api-sit1.cfaa.azr.hcsctest.net", // Update with your API URL
+  ENVIRONMENTS: "SIT1,UAT1,UIT1", // Update environments as per your project
+  DEFAULT_ENVIRONMENT: "SIT1", // Update default environment as per your project
   withCredentials: false, // Set to true if you need to send credentials with requests
 
   // Error code product names separated by commas
@@ -36,7 +36,7 @@ export const environment = {
 };
 
 // Update values based on the provided information
-environment.API = "https://your-api-url.com"; // Update API URL
-environment.API_URL = "https://your-api-url.com"; // Update API URL
-environment.ENVIRONMENTS = "DEV,TEST"; // Update environments
-environment.DEFAULT_ENVIRONMENT = "DEV"; // Update default environment
+environment.API = "https://envuplift-api-sit1.cfaa.azr.hcsctest.net"; // Update API URL
+environment.API_URL = "https://envuplift-api-sit1.cfaa.azr.hcsctest.net"; // Update API URL
+environment.ENVIRONMENTS = "SIT1,UAT1,UIT1"; // Update environments
+environment.DEFAULT_ENVIRONMENT = "SIT1"; // Update default environment
