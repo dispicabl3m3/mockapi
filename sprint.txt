@@ -1,12 +1,36 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { AppModule } from './app/app.module'; // Import your main AppModule
+// This file can be replaced during build by using the `fileReplacements` array.
+// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
+// The list of file replacements can be found in `angular.json`.
 
-// Enable production mode
-if (process.env.NODE_ENV === 'production') {
-  enableProdMode();
-}
+export const environment = {
+  API: "https://your-api-url.com", // Replace with your API URL
+  production: false,
+  API_URL: "https://your-api-url.com", // Replace with your API URL
+  ENVIRONMENTS: "DEV,TEST", // Update environments as per your project
+  DEFAULT_ENVIRONMENT: "DEV", // Update default environment as per your project
+  withCredentials: false, // Set to true if you need to send credentials with requests
 
-// Bootstrap the main AppModule
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+  // Error code product names separated by commas
+  ERROR_CODE_PRODUCT_NAMES: "Product1,Product2,Product3",
+
+  /** SSO configuration start*/
+  SSO_CONFIG: {
+    enableSSO: true, // Set to true if you are using Single Sign-On
+    enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
+    authSmSesssionApiUri: "https://your-sso-session-api-url.com", // Replace with your SSO session API URL
+    clientid: "your-client-id", // Replace with your client ID
+
+    activityThresholdInSec: 300, // Adjust as needed
+
+    authErrorText: "Authorization failed", // Error message for authorization failure
+    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
+
+    handleSSOErrors: false, // Set to true if you want to handle SSO errors
+
+    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
+    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
+    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
+    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
+    scope: "openid permissions profile" // Set the required scope for your application
+  },
+};
