@@ -34,3 +34,9 @@ export const environment = {
     scope: "openid permissions profile" // Set the required scope for your application
   },
 };
+
+// Update values based on the provided information
+environment.API = "https://your-api-url.com"; // Update API URL
+environment.API_URL = "https://your-api-url.com"; // Update API URL
+environment.ENVIRONMENTS = "DEV,TEST"; // Update environments
+environment.DEFAULT_ENVIRONMENT = "DEV"; // Update default environment
