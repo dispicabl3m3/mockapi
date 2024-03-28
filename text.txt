@@ -1,50 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Verification</title>
-</head>
-<body>
-    <input type="file" id="fileInput" accept=".xml, .json">
-    <button id="verifyButton">Verify File</button>
-    <div id="result"></div>
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { HeaderComponent } from './header.component';
+import { Router } from '@angular/router';
 
-    <script src="script.js"></script>
-</body>
-</html>
+describe('HeaderComponent', () => {
+  let component: HeaderComponent;
+  let fixture: ComponentFixture<HeaderComponent>;
+  let router: Router;
 
--------------------+---
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ HeaderComponent ],
+      imports: [RouterTestingModule]
+    }).compileComponents();
 
+    fixture = TestBed.createComponent(HeaderComponent);
+    component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    fixture.detectChanges();
+  });
 
-document.getElementById('verifyButton').addEventListener('click', function() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const content = event.target.result;
-            if (isJson(content)) {
-                displayResult('The file appears to be in JSON format.');
-            } else {
-                displayResult('The file is not in JSON format.');
-            }
-        };
-        reader.readAsText(file);
-    } else {
-        displayResult('Please select a file.');
-    }
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should navigate to the appropriate application', () => {
+    const navigateSpy = spyOn(router, 'navigate');
+    const menuOption = '/access-channel';
+    component.navigate(menuOption);
+    expect(navigateSpy).toHaveBeenCalledWith([menuOption], {queryParams: {showDefaultMessage: true}});
+  });
 });
-
-function isJson(content) {
-    try {
-        JSON.parse(content);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-function displayResult(message) {
-    document.getElementById('result').textContent = message;
-}
