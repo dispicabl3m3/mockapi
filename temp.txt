@@ -1,19 +1,33 @@
-export class Constants {
-  public static DEV_UI_URL: string = 'envuplift-ui-uit1.cfaa.azr.hcsctest.net';
-  public static DEV_UI_FR_URL: string = 'envuplift-ui-uit1.test.fyiblue.com';
-  public static UAT_UI_URL: string = 'envuplift-ui-uat1.cfaa.azr.hcsctest.net';
-  public static UAT_UI_FR_URL: string = 'envuplift-ui-uat1.test.fyiblue.com';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
-  public static SERVICE_URL: any = {
-    'envuplift-ui-uit1.cfaa.azr.hcsctest.net': 'envuplift-api-uit1.cfaa.azr.hcsctest.net',
-    'envuplift-ui-uit1.test.fyiblue.com':    'envuplift-api-uit1.test.fyiblue.com',
-    'envuplift-ui-uat1.cfaa.azr.hcsctest.net': 'envuplift-api-uat1.cfaa.azr.hcsctest.net',
-    'envuplift-ui-uat1.test.fyiblue.com':    'envuplift-api-uat1.test.fyiblue.com',
-  };
+@Component({
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.scss']
+})
+export class HeaderComponent {
 
-  public static alphaChk = /^[a-zA-Z]*$/;
-  public static alphaNumChk = /^[a-zA-Z\d]*$/;
-  public static numChk = /^\d*$/;
-  public static numChkWithDecimal = /^[\d\.]*$/;
-  public static memberNotAllZeros = /^(?!0{17})[A-Z0-9][0-9]{16}$/;
+  /** holds the value of selected menu item */
+  selectedValue: string="";
+
+  /** list of menu items to show */
+  options=[
+    {value:'/access-channel', label:'Access Channel'},
+    {value:'/cotiviti', label:'Cotiviti'},
+    {value:'/idr', label:'Independent Dispute Resolution (IDR)'},
+    {value:'/shared-accums-inbound', label:'Shared Accums - Inbound'},
+    
+  ];
+
+  constructor(private router: Router){
+  }
+
+  /** clicking on a menu item to navigate to the appropriate application 
+   * every time menu option changes, we would show a default message 
+   * this would insruct the user to click on a tab to continue an action
+  */
+  navigate(value: any){
+    this.router.navigate([value],{queryParams : { showDefaultMessage: true }});
+  }
 }
