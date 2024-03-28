@@ -1,42 +1,23 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-export const environment = {
-  API: "https://envuplift-api-sit1.cfaa.azr.hcsctest.net", // Update with your API URL
-  production: false,
-  API_URL: "https://envuplift-api-sit1.cfaa.azr.hcsctest.net", // Update with your API URL
-  ENVIRONMENTS: "SIT1,UAT1,UIT1", // Update environments as per your project
-  DEFAULT_ENVIRONMENT: "SIT1", // Update default environment as per your project
-  withCredentials: false, // Set to true if you need to send credentials with requests
+import { HeaderComponent } from './header.component';
 
-  // Error code product names separated by commas
-  ERROR_CODE_PRODUCT_NAMES: "Product1,Product2,Product3",
+describe('HeaderComponent', () => {
+  let component: HeaderComponent;
+  let fixture: ComponentFixture<HeaderComponent>;
 
-  /** SSO configuration start*/
-  SSO_CONFIG: {
-    enableSSO: true, // Set to true if you are using Single Sign-On
-    enableAuthHeader: true,  // Enable to send <Bearer: token> header with request
-    authSmSesssionApiUri: "https://your-sso-session-api-url.com", // Replace with your SSO session API URL
-    clientid: "your-client-id", // Replace with your client ID
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ HeaderComponent ]
+    })
+    .compileComponents();
 
-    activityThresholdInSec: 300, // Adjust as needed
+    fixture = TestBed.createComponent(HeaderComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
 
-    authErrorText: "Authorization failed", // Error message for authorization failure
-    authTokenExpiryErrorText: "Session expired, please try logging in again", // Error message for expired session
-
-    handleSSOErrors: false, // Set to true if you want to handle SSO errors
-
-    defaultAuthorizationAPIErrorHandling: true, // Set to true for default authorization API error handling
-    defaultSessionTimeoutErrorHandling: false, // Set to true for default session timeout error handling
-    defaultAuthorizationErrorHandling: false, // Set to true for default authorization error handling
-    authorizationAPIErrorCodes: [401, 403], // Authorization error codes to handle
-    scope: "openid permissions profile" // Set the required scope for your application
-  },
-};
-
-// Update values based on the provided information
-environment.API = "https://envuplift-api-sit1.cfaa.azr.hcsctest.net"; // Update API URL
-environment.API_URL = "https://envuplift-api-sit1.cfaa.azr.hcsctest.net"; // Update API URL
-environment.ENVIRONMENTS = "SIT1,UAT1,UIT1"; // Update environments
-environment.DEFAULT_ENVIRONMENT = "SIT1"; // Update default environment
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
