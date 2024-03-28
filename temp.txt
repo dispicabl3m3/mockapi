@@ -1,33 +1,73 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-
-@Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
-})
-export class HeaderComponent {
-
-  /** holds the value of selected menu item */
-  selectedValue: string="";
-
-  /** list of menu items to show */
-  options=[
-    {value:'/access-channel', label:'Access Channel'},
-    {value:'/cotiviti', label:'Cotiviti'},
-    {value:'/idr', label:'Independent Dispute Resolution (IDR)'},
-    {value:'/shared-accums-inbound', label:'Shared Accums - Inbound'},
-    
-  ];
-
-  constructor(private router: Router){
-  }
-
-  /** clicking on a menu item to navigate to the appropriate application 
-   * every time menu option changes, we would show a default message 
-   * this would insruct the user to click on a tab to continue an action
-  */
-  navigate(value: any){
-    this.router.navigate([value],{queryParams : { showDefaultMessage: true }});
-  }
-}
+AppComponent > should render title
+Error: NG0304: 'app-header' is not a known element (used in the 'AppComponent' component template):
+1. If 'app-header' is an Angular component, then verify that it is a part of an @NgModule where this component is declared.
+2. If 'app-header' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+error properties: Object({ code: 304 })
+    at validateElementIsKnown (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:4888:23)
+    at ɵɵelementStart (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13584:9)
+    at ɵɵelement (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13656:5)
+    at templateFn (ng:///AppComponent.js:8:9)
+    at executeTemplate (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10441:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10263:13)
+    at renderComponent (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:11434:5)
+    at renderChildComponents (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10122:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10288:13)
+    at ComponentFactory.create (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12178:13)
+AppComponent > should create the app
+Error: NG0304: 'app-header' is not a known element (used in the 'AppComponent' component template):
+1. If 'app-header' is an Angular component, then verify that it is a part of an @NgModule where this component is declared.
+2. If 'app-header' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+error properties: Object({ code: 304 })
+    at validateElementIsKnown (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:4888:23)
+    at ɵɵelementStart (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13584:9)
+    at ɵɵelement (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13656:5)
+    at templateFn (ng:///AppComponent.js:8:9)
+    at executeTemplate (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10441:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10263:13)
+    at renderComponent (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:11434:5)
+    at renderChildComponents (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10122:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10288:13)
+    at ComponentFactory.create (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12178:13)
+AppComponent > should have as title 'Environment_Uplift_UI'
+Error: NG0304: 'app-header' is not a known element (used in the 'AppComponent' component template):
+1. If 'app-header' is an Angular component, then verify that it is a part of an @NgModule where this component is declared.
+2. If 'app-header' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@NgModule.schemas' of this component to suppress this message.
+error properties: Object({ code: 304 })
+    at validateElementIsKnown (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:4888:23)
+    at ɵɵelementStart (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13584:9)
+    at ɵɵelement (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:13656:5)
+    at templateFn (ng:///AppComponent.js:8:9)
+    at executeTemplate (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10441:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10263:13)
+    at renderComponent (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:11434:5)
+    at renderChildComponents (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10122:9)
+    at renderView (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10288:13)
+    at ComponentFactory.create (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12178:13)
+SharedAccumsInboundComponent > should create
+NullInjectorError: R3InjectorError(DynamicTestModule)[ActivatedRoute -> ActivatedRoute]: 
+  NullInjectorError: No provider for ActivatedRoute!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'ActivatedRoute', 'ActivatedRoute' ] })
+    at NullInjector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7493:27)
+    at R3Injector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7914:33)
+    at R3Injector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7914:33)
+    at ChainedInjector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12084:36)
+    at lookupTokenUsingModuleInjector (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3201:39)
+    at getOrCreateInjectable (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3246:12)
+    at ɵɵdirectiveInject (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10041:12)
+    at NodeInjectorFactory.factory (ng:///SharedAccumsInboundComponent/ɵfac.js:5:7)
+    at getNodeInjectable (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3431:44)
+    at createRootComponent (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12297:35)
+CreateTemplateRequestComponent > should create
+NullInjectorError: R3InjectorError(DynamicTestModule)[ActivatedRoute -> ActivatedRoute]: 
+  NullInjectorError: No provider for ActivatedRoute!
+error properties: Object({ ngTempTokenPath: null, ngTokenPath: [ 'ActivatedRoute', 'ActivatedRoute' ] })
+    at NullInjector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7493:27)
+    at R3Injector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7914:33)
+    at R3Injector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:7914:33)
+    at ChainedInjector.get (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12084:36)
+    at lookupTokenUsingModuleInjector (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3201:39)
+    at getOrCreateInjectable (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3246:12)
+    at ɵɵdirectiveInject (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:10041:12)
+    at NodeInjectorFactory.factory (ng:///CreateTemplateRequestComponent/ɵfac.js:5:7)
+    at getNodeInjectable (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:3431:44)
+    at createRootComponent (http://localhost:9876/_karma_webpack_/webpack:/node_modules/@angular/core/fesm2020/core.mjs:12297:35)
